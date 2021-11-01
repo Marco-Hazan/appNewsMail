@@ -1,0 +1,18 @@
+Marco <marco@uniServer.it>
+
+[channel1,channel2]
+
+Mon, 1 Nov 2021 11:39:39 +0100
+
+channel1,channel2
+
+header:
+
+     <meta charset="utf-8"/>     <title></title>   
+
+body:
+
+ questo è il body html
+il body è html
+
+
