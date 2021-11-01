@@ -10,7 +10,7 @@ for line in sys.stdin:
     s += line
 email = parser.parsestr(s)
 #estraggo sender
-print(email.get('From')+'\n')
+print("Sender:"+email.get('From')+'\n')
 #estraggo subject
 subject = email.get('Subject')
 print("Total Subject:"+subject+'\n')
