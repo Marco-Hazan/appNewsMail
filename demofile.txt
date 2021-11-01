@@ -1,18 +1,18 @@
 Marco <marco@uniServer.it>
 
-[channel1,channel2]
+Total Subject:[bdlab1,sic,montanelli,islab]{29/11/2019}Ricevimento prof. Montanelli
 
-Mon, 1 Nov 2021 11:39:39 +0100
+Data email:Mon, 1 Nov 2021 18:10:21 +0100
 
-channel1,channel2
+Canali:bdlab1,sic,montanelli,islab
 
-header:
+Data dichiarata:29/11/2019
 
-     <meta charset="utf-8"/>     <title></title>   
+Subject:Ricevimento prof. Montanelli
 
-body:
+il body non è html
 
- questo è il body html
-il body è html
+Il ricevimento studenti del 28/11/2019 avrà luogo alle ore 14.
+
 
 
