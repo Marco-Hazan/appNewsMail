@@ -1,8 +1,8 @@
-Marco <marco@uniServer.it>
+Sender:Marco Hazan <marco@uniServer.it>
 
 Total Subject:[bdlab1,sic,montanelli,islab]{29/11/2019}Ricevimento prof. Montanelli
 
-Data email:Mon, 1 Nov 2021 18:10:21 +0100
+Data email:Mon, 1 Nov 2021 19:13:22 +0100
 
 Canali:bdlab1,sic,montanelli,islab
 
@@ -12,4 +12,6 @@ Subject:Ricevimento prof. Montanelli
 
 il body non è html
 
-Il ricevimento studenti del 28/11/2019 avrà luogo alle ore 14.
+Il ricevimento studenti del 28/11/2019 avrà luogo alle ore 15.
+
+
