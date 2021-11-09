@@ -35,7 +35,7 @@ if pattern.match(tot_subject):
     pub_date = pub_date.strftime("%Y-%m-%d %H:%M")
     subject = tot_subject[tot_subject.find("}")+1:]
 #estraggo body
-body = email.get_payload()
+body = email.get_payload().replace("\n","")
 #vedo se il body è html, nel caso estraggo body e header del documento html
 if BeautifulSoup(body, "html.parser").find():
     soup = BeautifulSoup(body, "html.parser")

@@ -1,10 +1,10 @@
-import confuse
+import yaml
 import psycopg2
 import mysql.connector
 import functions.News
 
-config = confuse.Configuration('appNewsMail')
-config.set_file('/var/www/appNewsMail/master/config.yaml')
+config_file = open("/var/www/appNewsMail/master/config.yaml")
+config = yaml.load(config_file)
 
 def connectionPostgres():
     # Connect to an existing database
@@ -26,7 +26,7 @@ def connectionMysql():
 class ActionsDb:
 
     def connectdb(self):
-        dbms = config['database']['dbms'].get()
+        dbms = config['database']['dbms']
         if dbms == 'postgresql':
             conn = connectionPostgres()
             print(conn)
