@@ -2,20 +2,46 @@ import email
 import sys
 import re
 import random
+import base64
+import os
 import datetime
 from datetime import timedelta
 from datetime import datetime
 from dateutil import parser
 from functions.News import News
 from newsmailDao import newsmailDao
+from ChannelDao import ChannelDao
+from SenderDao import SenderDao
 from bs4 import BeautifulSoup
 from email.parser import Parser
+
+def checkchannels(channels):
+    daochannel = ChannelDao()
+    for c in channels:
+        if not daochannel.isActive(c):
+            return False
+    return True
+
+def checksender(sender):
+    daosender = SenderDao()
+    return daosender.isActive(sender)
+
+
+
+
+
 parsermail = Parser()
+dao = newsmailDao()
+unique = False
+while not unique:
+    msgid = random.randint(0,1000000)
+    unique = dao.isUnique(msgid)
 s = ""
 #l'input arrivato da stdin lo salvo all'interno di una stringa
 for line in sys.stdin:
     s += line
 email = parsermail.parsestr(s)
+body = email.get_payload()
 #estraggo sender
 sender = email.get('From')
 sender = sender[sender.find("<")+1:sender.find("@")]
@@ -30,26 +56,42 @@ creation_date = x.strftime("%Y-%m-%d %H:%M")
 pattern = re.compile("\[[A-Za-z0-9, ]*\]\{[0-9][0-9]\/[0-9][0-9]\/[0-9][0-9][0-9][0-9]\}.+")
 if pattern.match(tot_subject):
     channels = tot_subject[tot_subject.find("[")+1:tot_subject.find("]")]
+    channels = channels.split(",")
     pub_date = tot_subject[tot_subject.find("{")+1:tot_subject.find("}")]
     pub_date = datetime.strptime(pub_date,'%d/%m/%Y')
     pub_date = pub_date.strftime("%Y-%m-%d %H:%M")
     subject = tot_subject[tot_subject.find("}")+1:]
 #estraggo body
-body = email.get_payload().replace("\n","")
-#vedo se il body è html, nel caso estraggo body e header del documento html
-if BeautifulSoup(body, "html.parser").find():
-    soup = BeautifulSoup(body, "html.parser")
-    headerhtml = soup.find('head')
-    bodyhtml = soup.find('body')
-    print(headerhtml.decode_contents().replace("\n",""))
-    bodyhtml = bodyhtml.decode_contents().replace("\n","")
-#se il documento non è html estraggo solo l'intero body della mail
+body = ""
+valid_channels = checkchannels(channels)
+valid_sender = checksender(sender)
+if valid_channels and valid_sender:
+    if email.is_multipart():
+        for part in email.walk():
+            if part.get_content_type() != 'text/plain' and part.get_content_type() != 'multipart/mixed':
+                try:
+                    os.mkdir("/usr/share/appNewsMail/"+str(msgid))
+                except OSError:
+                    pass
+                filename = part.get_filename()
+                with open("/usr/share/appNewsMail/"+str(msgid)+"/"+filename, 'wb') as f:
+                    message_bytes = base64.b64decode(str(part.get_payload()))
+                    f.write(message_bytes)
+                    #for attpart in part:
+                        #print(attpart)
+            elif part.get_content_type() == 'text/plain':
+                body += part.get_payload().replace("\n","")
+    #vedo se il body è html, nel caso estraggo body e header del documento html
+    if BeautifulSoup(body, "html.parser").find():
+        soup = BeautifulSoup(body, "html.parser")
+        headerhtml = soup.find('head')
+        bodyhtml = soup.find('body')
+        print(headerhtml.decode_contents().replace("\n",""))
+        bodyhtml = bodyhtml.decode_contents().replace("\n","")
+    #se il documento non è html estraggo solo l'intero body della mail
+    else:
+        bodyhtml = None
+    newsmail = News(msgid,sender,subject,channels,body,bodyhtml,creation_date,pub_date,expiration_date)
+    dao.insert(newsmail)
 else:
-    bodyhtml = None
-dao = newsmailDao()
-unique = False
-while not unique:
-    msgid = random.randint(0,1000000)
-    unique = dao.isUnique(msgid)
-newsmail = News(msgid,sender,subject,channels.split(","),body,bodyhtml,creation_date,pub_date,expiration_date)
-dao.insert(newsmail)
+    print("ERRORE")

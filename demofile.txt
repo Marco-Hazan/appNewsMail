@@ -1,2 +1,5 @@
-<connection object at 0x7fa3743c4400; dsn: 'user=marco password=xxx dbname=newsmail host=localhost port=5432', closed: 0>
-<connection object at 0x7fa3743c4400; dsn: 'user=marco password=xxx dbname=newsmail host=localhost port=5432', closed: 0>
+<connection object at 0x7f3e61aadb80; dsn: 'user=marco password=xxx dbname=newsmail host=localhost port=5432', closed: 0>
+<connection object at 0x7f3e619fd400; dsn: 'user=marco password=xxx dbname=newsmail host=localhost port=5432', closed: 0>
+<connection object at 0x7f3e619fd400; dsn: 'user=marco password=xxx dbname=newsmail host=localhost port=5432', closed: 0>
+<connection object at 0x7f3e619fd400; dsn: 'user=marco password=xxx dbname=newsmail host=localhost port=5432', closed: 0>
+<connection object at 0x7f3e619fd400; dsn: 'user=marco password=xxx dbname=newsmail host=localhost port=5432', closed: 0>
