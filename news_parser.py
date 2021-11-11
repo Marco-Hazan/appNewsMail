@@ -10,6 +10,7 @@ from datetime import datetime
 from dateutil import parser
 from functions.News import News
 from newsmailDao import newsmailDao
+from AttachmentDao import AttachmentDao
 from ChannelDao import ChannelDao
 from SenderDao import SenderDao
 from bs4 import BeautifulSoup
@@ -31,11 +32,11 @@ def checksender(sender):
 
 
 parsermail = Parser()
-dao = newsmailDao()
+dao_news = newsmailDao()
 unique = False
 while not unique:
     msgid = random.randint(0,1000000)
-    unique = dao.isUnique(msgid)
+    unique = dao_news.isUnique(msgid)
 s = ""
 #l'input arrivato da stdin lo salvo all'interno di una stringa
 for line in sys.stdin:
@@ -63,35 +64,41 @@ if pattern.match(tot_subject):
     subject = tot_subject[tot_subject.find("}")+1:]
 #estraggo body
 body = ""
+bodyhtml = None
+attachments = []
 valid_channels = checkchannels(channels)
 valid_sender = checksender(sender)
 if valid_channels and valid_sender:
     if email.is_multipart():
         for part in email.walk():
-            if part.get_content_type() != 'text/plain' and part.get_content_type() != 'multipart/mixed':
+            print(part.get_content_type())
+            if part.get_content_type() != 'text/plain' and part.get_content_type() != 'multipart/mixed' and part.get_content_type != 'text/html' and part.get_content_type() != 'multipart/alternative':
                 try:
                     os.mkdir("/usr/share/appNewsMail/"+str(msgid))
                 except OSError:
                     pass
-                filename = part.get_filename()
-                with open("/usr/share/appNewsMail/"+str(msgid)+"/"+filename, 'wb') as f:
-                    message_bytes = base64.b64decode(str(part.get_payload()))
-                    f.write(message_bytes)
-                    #for attpart in part:
-                        #print(attpart)
-            elif part.get_content_type() == 'text/plain':
+                if part.get_filename() is not None:
+                    filename = part.get_filename()
+                    attachments.append(filename)
+                    with open("/usr/share/appNewsMail/"+str(msgid)+"/"+filename, 'wb') as f:
+                        try:
+                            message_bytes = base64.b64decode(str(part.get_payload()))
+                            f.write(message_bytes)
+                        except ValueError:
+                            pass
+            if part.get_content_type() == 'text/plain' or part.get_content_type() == 'text/html':
                 body += part.get_payload().replace("\n","")
-    #vedo se il body è html, nel caso estraggo body e header del documento html
-    if BeautifulSoup(body, "html.parser").find():
-        soup = BeautifulSoup(body, "html.parser")
-        headerhtml = soup.find('head')
-        bodyhtml = soup.find('body')
-        print(headerhtml.decode_contents().replace("\n",""))
-        bodyhtml = bodyhtml.decode_contents().replace("\n","")
-    #se il documento non è html estraggo solo l'intero body della mail
-    else:
-        bodyhtml = None
+            #vedo se il body è html, nel caso estraggo body e header del documento html
+            #se il documento non è html estraggo solo l'intero body della mail
+            if part.get_content_type() == 'text/html':
+                if BeautifulSoup(part.get_payload(), "html.parser").find():
+                    soup = BeautifulSoup(part.get_payload(), "html.parser")
+                    headerhtml = soup.find('head')
+                    bodyhtml = soup.find('body')
+                    bodyhtml = bodyhtml.decode_contents().replace("\n","")
     newsmail = News(msgid,sender,subject,channels,body,bodyhtml,creation_date,pub_date,expiration_date)
-    dao.insert(newsmail)
+    dao_news.insert(newsmail)
+    dao_attachment = AttachmentDao()
+    dao_attachment.insert(msgid,attachments)
 else:
     print("ERRORE")

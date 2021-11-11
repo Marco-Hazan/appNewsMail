@@ -1,4 +1,5 @@
 from functions.actionsdb import ActionsDb
+from SentDao import SentDao
 import time
 import datetime
 
@@ -33,3 +34,5 @@ class newsmailDao:
         cursor.execute(sql,val)
         connection.commit()
         connection.close()
+        sentDao = SentDao()
+        sentDao.insert(newsmail.msgid,newsmail.channels)

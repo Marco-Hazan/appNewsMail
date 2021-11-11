@@ -11,8 +11,6 @@ class News:
         self.__subject = subject
         self.__body = body
         self.__htmlbody = htmlbody
-        self.__is_html = False
-        self.__htmlbody =  None
         self.__creation_date = creation_date
         self.__pub_date = pub_date
         self.__expiration_date = expiration_date

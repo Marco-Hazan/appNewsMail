@@ -1,5 +1,14 @@
-<connection object at 0x7f3e61aadb80; dsn: 'user=marco password=xxx dbname=newsmail host=localhost port=5432', closed: 0>
-<connection object at 0x7f3e619fd400; dsn: 'user=marco password=xxx dbname=newsmail host=localhost port=5432', closed: 0>
-<connection object at 0x7f3e619fd400; dsn: 'user=marco password=xxx dbname=newsmail host=localhost port=5432', closed: 0>
-<connection object at 0x7f3e619fd400; dsn: 'user=marco password=xxx dbname=newsmail host=localhost port=5432', closed: 0>
-<connection object at 0x7f3e619fd400; dsn: 'user=marco password=xxx dbname=newsmail host=localhost port=5432', closed: 0>
+<connection object at 0x7fe34795fb80; dsn: 'user=marco password=xxx dbname=newsmail host=localhost port=5432', closed: 0>
+<connection object at 0x7fe3478ab400; dsn: 'user=marco password=xxx dbname=newsmail host=localhost port=5432', closed: 0>
+<connection object at 0x7fe3478ab400; dsn: 'user=marco password=xxx dbname=newsmail host=localhost port=5432', closed: 0>
+<connection object at 0x7fe3478ab400; dsn: 'user=marco password=xxx dbname=newsmail host=localhost port=5432', closed: 0>
+multipart/mixed
+multipart/alternative
+text/plain
+text/html
+image/png
+<connection object at 0x7fe3478ab400; dsn: 'user=marco password=xxx dbname=newsmail host=localhost port=5432', closed: 0>
+<connection object at 0x7fe3478ab540; dsn: 'user=marco password=xxx dbname=newsmail host=localhost port=5432', closed: 0>
+<connection object at 0x7fe3478ab680; dsn: 'user=marco password=xxx dbname=newsmail host=localhost port=5432', closed: 0>
+<connection object at 0x7fe3478ab680; dsn: 'user=marco password=xxx dbname=newsmail host=localhost port=5432', closed: 0>
+<connection object at 0x7fe3478ab400; dsn: 'user=marco password=xxx dbname=newsmail host=localhost port=5432', closed: 0>
