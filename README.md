@@ -5,4 +5,9 @@ Esso estrae sender della mail, subject e body.
 Il subject deve essere nella forma [channel1,channel2,...]{dd/mm/YYYY} titolo news . Tra parentesi quadre sono contenuti i canali sui quali dovrà essere pubblicata la news, tra parentesi graffe la data di quando verrà pubblicata la news e fuori dalle parentesi il titolo della news.
 Il body poi può essere passato come un html e in quel caso viene salvato anche il body html.
 
-I dati vengono salvati in un database che può essere configurato all'interno di un file config.yaml. Per ora questa libreria è compatibile con postgresql e con mysql-server. 
+I dati vengono salvati in un database che può essere configurato all'interno di un file config.yaml. Per ora questa libreria è compatibile con postgresql e con mysql-server.
+
+Aggiornamento 11/11/2021:
+
+Gestione Allegati:
+se la mail contiene degli allegati essi vengono decodificati da base64 in bytes e questi byte vengono scritti su un nuovo file. Il file allegato viene quindi salvato in una cartella chiamata con il msgid della mail contenuta in /usr/share/appNewsMail/. 
