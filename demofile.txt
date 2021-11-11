@@ -1,14 +1,14 @@
-<connection object at 0x7fe34795fb80; dsn: 'user=marco password=xxx dbname=newsmail host=localhost port=5432', closed: 0>
-<connection object at 0x7fe3478ab400; dsn: 'user=marco password=xxx dbname=newsmail host=localhost port=5432', closed: 0>
-<connection object at 0x7fe3478ab400; dsn: 'user=marco password=xxx dbname=newsmail host=localhost port=5432', closed: 0>
-<connection object at 0x7fe3478ab400; dsn: 'user=marco password=xxx dbname=newsmail host=localhost port=5432', closed: 0>
+<mysql.connector.connection_cext.CMySQLConnection object at 0x7f392b398790>
+CANALE:	silab
+<mysql.connector.connection_cext.CMySQLConnection object at 0x7f3928c75ac0>
+<mysql.connector.connection_cext.CMySQLConnection object at 0x7f3928c75ac0>
 multipart/mixed
 multipart/alternative
 text/plain
 text/html
-image/png
-<connection object at 0x7fe3478ab400; dsn: 'user=marco password=xxx dbname=newsmail host=localhost port=5432', closed: 0>
-<connection object at 0x7fe3478ab540; dsn: 'user=marco password=xxx dbname=newsmail host=localhost port=5432', closed: 0>
-<connection object at 0x7fe3478ab680; dsn: 'user=marco password=xxx dbname=newsmail host=localhost port=5432', closed: 0>
-<connection object at 0x7fe3478ab680; dsn: 'user=marco password=xxx dbname=newsmail host=localhost port=5432', closed: 0>
-<connection object at 0x7fe3478ab400; dsn: 'user=marco password=xxx dbname=newsmail host=localhost port=5432', closed: 0>
+image/jpeg
+application/pdf
+<mysql.connector.connection_cext.CMySQLConnection object at 0x7f3928beb7c0>
+<mysql.connector.connection_cext.CMySQLConnection object at 0x7f3928beb250>
+<mysql.connector.connection_cext.CMySQLConnection object at 0x7f3928beb940>
+<mysql.connector.connection_cext.CMySQLConnection object at 0x7f3928beb7c0>

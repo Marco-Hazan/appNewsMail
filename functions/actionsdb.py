@@ -3,7 +3,7 @@ import psycopg2
 import mysql.connector
 import functions.News
 
-config_file = open("/var/www/appNewsMail/master/config.yaml")
+config_file = open("/home/marco/appNewsMail/master/config.yaml")
 config = yaml.load(config_file)
 
 def connectionPostgres():
