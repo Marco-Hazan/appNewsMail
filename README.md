@@ -1,13 +1,46 @@
-Aggiornamento 09/11/2021:
+Setting server di postfix:
+ogni user per ora è un user della macchina
+mail non lette salvate in /var/mail/nomeutente
+mail lette salvate in /home/nomeutente/mbox
 
-all'arrivo di una mail allo user newsmail viene mandato un input come standard input allo script news_parser.py.
-Esso estrae sender della mail, subject e body.
-Il subject deve essere nella forma [channel1,channel2,...]{dd/mm/YYYY} titolo news . Tra parentesi quadre sono contenuti i canali sui quali dovrà essere pubblicata la news, tra parentesi graffe la data di quando verrà pubblicata la news e fuori dalle parentesi il titolo della news.
-Il body poi può essere passato come un html e in quel caso viene salvato anche il body html.
+Main.cf:
+aliases: /etc/aliases
+myhostname: uniServer.it  (Usando Thunderbird veniva richiesto)
 
-I dati vengono salvati in un database che può essere configurato all'interno di un file config.yaml. Per ora questa libreria è compatibile con postgresql e con mysql-server.
+Contenuto di /etc/aliases: newsmail: "|python3 /home/appNewsMail/master/news_parser.py > /home/appNewsMail/master/demofile.txt"
 
-Aggiornamento 11/11/2021:
+L'intera app è momentaneamente salvata nella home.
 
-Gestione Allegati:
-se la mail contiene degli allegati essi vengono decodificati da base64 in bytes e questi byte vengono scritti su un nuovo file. Il file allegato viene quindi salvato in una cartella chiamata con il msgid della mail contenuta in /usr/share/appNewsMail/. 
+News_parser:
+estrae sender,subject e body della mail
+sender è nella forma <username@domain> perciò viene estratto solo username
+subject deve essere nella forma [channel1,channel2,...]{dd/mm/YYYY}titolo_news
+Vengono quindi estratti i canali e salvati dentro un array, salvata la data di scadenza come timestamp e salvato il titolo della news.
+Se il sender e i channel sono validi viene generato un msgid e parsato il body della mail:
+il body può essere multipart oppure no. Se non è multipart l'unica parte sarà di tipo (content-type) text/plain, se invece è multipart potrebbe esserci html oppure altri tipi di contenuti che saranno allegati.
+Se c'è solo una parte estraggo semplicemente l'intero body. Se c'è sia text/plain che text/html allora estraggo sia l'intero body che il body dell'html. Se ci sono altri tipi di contenuti, se hanno un filename, li estraggo come allegati decodificando da base64 e scrivo un file con il contenuto di quei bytes.
+Una volta estratto tutto salvo tutte le varie parti estratte e il msgid in un ogggetto News che passerò a un data access object che si collega con il database e salva la news nel database.
+
+
+Gestione allegati:
+I file estratti vengono salvati in /home/appNewsMail/attachments/msgid, dove msgid è l'id della mail dove sono stati estratti.
+
+
+Gestione database:
+- diagramma er
+In un file di configurazione .yaml ho salvato le informazioni per collegarsi a un database.
+I database per ora supportati sono mysql e postgresql (già testati)
+In un file python actionsdb.py vengono gestite le varie connessioni leggendo le informazioni necessarie dal file di configurazione.
+Da una funzione di connessione viene quindi ritornato un oggetto connection (mysql o postgresql). Per quanto gli oggetti ritornati da postgresql o mysql sono diversi i metodi per accedere alla base di dati sono identici perciò i vari dao che accedono al database possono operare senza sapere su quale specifico dbms.
+
+
+Moduli python utilizzati:
+Parser da email.parser -> modulo per parsare le mail e ritornare un oggetto email
+email -> modulo per gestire contenuto della mail
+BeatifulSoup da bs4 -> modulo per parsare file html (usato per estrarre body)
+re -> modulo usato per vedere se una stringa matcha con una particolare espressione regolare (nel subject)
+random -> generazione msgid
+base64 -> decodifica file allegati
+datetime -> generazione timestamp
+psycopg e mysql.connector -> moduli per la connessione rispettivamente a dbms postgres e mysql
+yaml -> per leggere i file di configurazione .yaml
