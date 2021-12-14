@@ -1,7 +1,7 @@
 class News:
 
     def __init__(self,msgid,sender,title,channels,body,htmlbody,creation_date,expiration_date,attachments):
-        if id == None or sender == None or title == None or channels == None or body == None or creation_date == None or expiration_date == None:
+        if id == None or sender == None or title == None or channels == None or creation_date == None or expiration_date == None:
             raise TypeError('Non ci possono essere argomenti None')
         self.__msgid = msgid
         self.__sender = sender

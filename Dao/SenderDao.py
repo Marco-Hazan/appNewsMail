@@ -1,24 +1,27 @@
 from functions.actionsdb import ActionsDb
 
-class ChannelDao:
 
-    def isActive(self,channel):
+
+class SenderDao:
+
+    def isActive(sender):
         actionsDb = ActionsDb()
         connection = actionsDb.connectdb()
         cursor = connection.cursor()
-        sql = "SELECT * FROM channel where name = %s and is_active = true"
-        val = (channel,)
+        sql = "SELECT * FROM appuser where username = %s and is_active = true"
+        val = (sender,)
         cursor.execute(sql, val)
         records = cursor.fetchall()
         connection.close()
         return cursor.rowcount == 1
 
-    def getCode(self,channelname):
+    def getId(sender):
         actionsDb = ActionsDb()
         connection = actionsDb.connectdb()
         cursor = connection.cursor()
-        sql = "SELECT * FROM channel where name = %s"
-        val = (channelname,)
-        cursor.execute(sql,val)
+        sql = "SELECT * FROM appuser where username = %s"
+        val = (sender,)
+        cursor.execute(sql, val)
         record = cursor.fetchone()
+        connection.close()
         return record[0]

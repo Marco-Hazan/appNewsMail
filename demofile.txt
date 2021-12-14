@@ -1,5 +1,1 @@
-<connection object at 0x7f030d6a7cc0; dsn: 'user=marco password=xxx dbname=newsmail host=localhost port=5432', closed: 0>
-<connection object at 0x7f030d6a7cc0; dsn: 'user=marco password=xxx dbname=newsmail host=localhost port=5432', closed: 0>
-<connection object at 0x7f030d6a7cc0; dsn: 'user=marco password=xxx dbname=newsmail host=localhost port=5432', closed: 0>
-<connection object at 0x7f030d6a7cc0; dsn: 'user=marco password=xxx dbname=newsmail host=localhost port=5432', closed: 0>
-<connection object at 0x7f030d6a7cc0; dsn: 'user=marco password=xxx dbname=newsmail host=localhost port=5432', closed: 0>
+ciccimarra@pippo.com, sara@pluto.it

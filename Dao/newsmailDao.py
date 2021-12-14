@@ -1,5 +1,6 @@
 from functions.actionsdb import ActionsDb
 from SentDao import SentDao
+from SenderDao import SenderDao
 import time
 import datetime
 
@@ -17,13 +18,14 @@ class newsmailDao:
         return cursor.rowcount == 0
 
     def insert(self,newsmail):
+        sender_id = SenderDao.getId(newsmail.sender)
         actionsDb = ActionsDb()
         connection = actionsDb.connectdb()
         cursor = connection.cursor()
         sql = "INSERT INTO newsmail (msgid,sender,title,body,htmlbody,creation_date,expiration_date) VALUES(%s,%s,%s,%s,%s,%s,%s)"
         val = (
             newsmail.msgid,
-            newsmail.sender,
+            sender_id,
             newsmail.title,
             newsmail.body,
             newsmail.htmlbody,
@@ -33,8 +35,6 @@ class newsmailDao:
         cursor.execute(sql,val)
         connection.commit()
         connection.close()
-        sentDao = SentDao()
-        sentDao.insert(newsmail.msgid,newsmail.channels)
 
     def updateStatus(msgid,statuscode):
         actionsDb = ActionsDb()
@@ -62,7 +62,7 @@ class newsmailDao:
         actionsDb = ActionsDb()
         connection = actionsDb.connectdb()
         cursor = connection.cursor()
-        sql = "SELECT sender FROM newsmail where msgid = %s"
+        sql = "SELECT appuser.username FROM newsmail JOIN appuser ON appuser.id = newsmail.sender where msgid = %s"
         val = (msgid,)
         cursor.execute(sql, val)
         record = cursor.fetchone()

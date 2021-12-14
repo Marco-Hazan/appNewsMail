@@ -9,7 +9,9 @@ import base64
 import os
 import time
 import datetime
+from Publication import ChannelHandler
 from os import path
+from functions.verify_signature import PyCrypto
 from functions.mailfunctions import MailFunction
 from datetime import timedelta
 from datetime import datetime
@@ -18,22 +20,23 @@ from functions.News import News
 from newsmailDao import newsmailDao
 from AttachmentDao import AttachmentDao
 from ChannelDao import ChannelDao
+from CanSendOnDao import CanSendOnDao
 from SenderDao import SenderDao
 from bs4 import BeautifulSoup
+from Objects.SendOn import SendOn
 from email.parser import Parser
+
+
 #Funzione che controlla che i canali specificati via mail sono effettivamente esistenti e attivi
 def checkchannels(channels):
-    daochannel = ChannelDao()
     for c in channels:
-        print("CANALE:\t"+c)
-        if not daochannel.isActive(c):
+        if not ChannelDao.isActive(c):
             return False
     return True
 
 #Funzione che controlla che il sender sia esistente e attivo
 def checksender(sender):
-    daosender = SenderDao()
-    return daosender.isActive(sender)
+    return SenderDao.isActive(sender)
 
 def extractBody(email):
     body = ""
@@ -46,23 +49,32 @@ def extractBody(email):
             body = email.get_payload()
     return body
 
-def extractHtmlBody(email):
+def find_pubkey_loc():
+    for filename in os.listdir("/home/marco/appNewsMail/attachments/"+msgid):
+        if ".asc" in filename:
+            return "/home/marco/appNewsMail/attachments/"+msgid+"/"+filename
+    return None
+
+
+def extractHtml(email):
     bodyhtml = None
     if email.is_multipart():
         for part in email.walk():
             if part.get_content_type() == 'text/html':
-                if BeautifulSoup(part.get_payload(), "html.parser").find():
-                    soup = BeautifulSoup(part.get_payload(), "html.parser")
-                    headerhtml = soup.find('head')
-                    bodyhtml = soup.find('body')
-                    bodyhtml = bodyhtml.decode_contents().replace("\n","")
+                #if BeautifulSoup(part.get_payload(), "html.parser").find():
+                    #soup = BeautifulSoup(part.get_payload(), "html.parser")
+                    #headerhtml = soup.find('head')
+                    #bodyhtml = soup.find('body')
+                    #bodyhtml = bodyhtml.decode_contents().replace("\n","")
+                bodyhtml = part.get_payload()
     else:
         if email.get_content_type() == 'text/html':
-            if BeautifulSoup(part.get_payload(), "html.parser").find():
-                soup = BeautifulSoup(part.get_payload(), "html.parser")
-                headerhtml = soup.find('head')
-                bodyhtml = soup.find('body')
-                bodyhtml = bodyhtml.decode_contents().replace("\n","")
+            #if BeautifulSoup(part.get_payload(), "html.parser").find():
+                #soup = BeautifulSoup(part.get_payload(), "html.parser")
+                #headerhtml = soup.find('head')
+                #bodyhtml = soup.find('body')
+                #bodyhtml = bodyhtml.decode_contents().replace("\n","")
+            bodyhtml = email.get_payload()
     return bodyhtml
 
 def extractAttachments(email,msgid):
@@ -75,7 +87,20 @@ def extractAttachments(email,msgid):
                 except OSError:
                     pass
                 if part.get_filename() is not None:
+                    '''
                     filename = part.get_filename()
+                    if filename == "OpenPGP_signature":
+                        global signature_flag
+                        signature_flag = True
+                        signature = str(part.get_payload())
+                    elif ".asc" in filename:
+                        with open("/home/marco/appNewsMail/attachments/"+str(msgid)+"/"+filename, 'a') as f:
+                            try:
+                                f.write(str(part.get_payload()))
+                            except ValueError:
+                                pass
+                    else:
+                    '''
                     attachments.append(filename)
                     with open("/home/marco/appNewsMail/attachments/"+str(msgid)+"/"+filename, 'ab') as f:
                         try:
@@ -89,9 +114,19 @@ def extractAttachments(email,msgid):
 
 
 
+def checkPermissionOnChannel(sender,channels):
+    id_sender = SenderDao.getId(sender)
+    for ch in channels:
+        if not CanSendOnDao.check(id_sender,ch):
+            return False
+    return True
+
+
+
 parsermail = Parser()
 dao_news = newsmailDao()
-
+signature_flag = False
+signature = None
 
 ###
 #Generazione id univoco per newsmail
@@ -110,12 +145,15 @@ s = ""
 #l'input arrivato da stdin lo salvo all'interno di una stringa che quindi passo al parser di email
 for line in sys.stdin:
     s += line
+data = s
 email = parsermail.parsestr(s)
 ###
 
 ###
 #estraggo sender
 tot_sender = email.get('From')
+cc = email.get('Cc')
+
 sender = tot_sender[tot_sender.find("<")+1:tot_sender.find(">")]
 
 #estraggo data della mail
@@ -167,6 +205,7 @@ if "update news" in subject and len(subject.split(" ")) == 3:
         htmlbody = extractHtmlBody(email)
         newsmailDao.updateBody(receivedMsgid,body,htmlbody)
         attachments = extractAttachments(email,receivedMsgid)
+        MailFunction.sendUpdatedMail(receivedMsgid,sender,body,htmlbody,attachments)
         exit()
     else:
         exit()
@@ -176,6 +215,7 @@ pattern = re.compile("\[[A-Za-z0-9, ]*\]\{[0-9][0-9]\/[0-9][0-9]\/[0-9][0-9][0-9
 if pattern.match(subject):
     channels = subject[subject.find("[")+1:subject.find("]")]
     channels = channels.split(",")
+    channels = ChannelHandler.extractChannels(channels)
     expiration_date = subject[subject.find("{")+1:subject.find("}")]
     expiration_date = datetime.strptime(expiration_date,'%d/%m/%Y')
     expiration_date = expiration_date.strftime("%Y-%m-%d %H:%M")
@@ -184,17 +224,37 @@ if pattern.match(subject):
 else:
     MailFunction.sendSubjectErrorMail(tot_sender,subject)
     exit()
+'''
+legit_channels = ChannelHandler.extractLegitChannels(channels)
+notlegit_channels = ChannelHandler.extractNotPermittedChannels(sender,channels)
+new_channels = ChannelHandler.extractNewChannels(channels)
+'''
 
-valid_channels = checkchannels(channels)
-if not valid_channels:
-    MailFunction.sendChannelErrorMail(tot_sender,channels)
-    exit()
+for c in new_channels:
+    ChannelHandler.createChannel(c,sender)
+    MailFunction.sendCreatedChannel()
+
+
 #estraggo body
 body = extractBody(email)
-bodyhtml = extractHtmlBody(email)
-attachments = extractAttachments(email)
-newsmail = News(msgid,sender,title,channels,body,bodyhtml,creation_date,expiration_date,attachments)
+bodyhtml = extractHtml(email)
+if bodyhtml is not None:
+    body = None
+attachments = extractAttachments(email,msgid)
+newsmail = News(msgid,sender,title,body,bodyhtml,creation_date,expiration_date)
 dao_news.insert(newsmail)
-dao_attachment = AttachmentDao()
-dao_attachment.insert(msgid,attachments)
-MailFunction.sendConfirmationMail(newsmail,tot_sender)
+for c in channels:
+    sendon = SendOn(newsmail,c)
+    action = sendon.defineAction()
+    action.act()
+MailFunction.sendConfirmationMail(newsmail,sender)
+
+'''
+if signature_flag == True:
+    public_key_loc = find_pubkey_loc()
+    public_key = str(email.get('Autocrypt')).split("keydata=")[1]
+    valid_signature = PyCrypto.verify_sign(public_key,signature,data)
+    if valid_signature:
+        pass
+        #print("FIRMA VALIDATA OH CAZZO")
+'''

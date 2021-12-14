@@ -2,36 +2,32 @@ import yaml
 import psycopg2
 import mysql.connector
 import functions.News
-
-config_file = open("/home/marco/appNewsMail/master/config.yaml")
-config = yaml.load(config_file)
+from functions.config import Config
 
 def connectionPostgres():
     # Connect to an existing database
-    connection = psycopg2.connect(user = config['database']['user_db'],
-                                  password= config['database']['password_db'],
-                                  host = config['database']['host'],
-                                  port = config['database']['port'],
-                                  database = config['database']['db_name'])
+    connection = psycopg2.connect(user = Config.getInnested("database","user_db"),
+                                  password= Config.getInnested("database","password_db"),
+                                  host = Config.getInnested("database","host"),
+                                  port = Config.getInnested("database","port"),
+                                  database = Config.getInnested("database","db_name"))
     cursor = connection.cursor()
     cursor.execute("Set search_path to newsmail;")
     return connection
 
 def connectionMysql():
-    connection = mysql.connector.connect(user = config['database']['user_db'].__str__(), password = config['database']['password_db'].__str__(),
-                          host = config['database']['host'].__str__(),
-                          database = config['database']['db_name'].__str__())
+    connection = mysql.connector.connect(user = Config.getInnested("database","user_db").__str__(), password = config['database']['password_db'].__str__(),
+                          host = Config.get("database","host").__str__(),
+                          database = Config.get("database","db_name").__str__())
     return connection
 
 class ActionsDb:
 
     def connectdb(self):
-        dbms = config['database']['dbms']
+        dbms = Config.getInnested("database","dbms")
         if dbms == 'postgresql':
             conn = connectionPostgres()
-            print(conn)
             return conn
         elif dbms == 'mysql-server':
             conn = connectionMysql()
-            print(conn)
             return conn
