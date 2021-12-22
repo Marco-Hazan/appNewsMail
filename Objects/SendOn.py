@@ -1,5 +1,5 @@
-from Channel import Channel
-from News import News
+from .Channel import Channel
+from .News import News
 
 class SendOn:
     def __init__(self,news,channel):

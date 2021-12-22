@@ -1,5 +1,6 @@
 from functions.actionsdb import ActionsDb
-from ChannelDao import ChannelDao
+from .ChannelDao import ChannelDao
+from .SenderDao import SenderDao
 
 class CanSendOnDao:
 
@@ -8,8 +9,9 @@ class CanSendOnDao:
         connection = actionsDb.connectdb()
         cursor = connection.cursor()
         code = ChannelDao.getCode(channel)
+        senderid = SenderDao.getId(sender)
         sql = "SELECT * FROM cansendon where appuser = %s and channel = %s"
-        val = (sender,code)
+        val = (senderid,code)
         cursor.execute(sql, val)
         records = cursor.fetchall()
         connection.close()

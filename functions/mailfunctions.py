@@ -3,10 +3,20 @@ from string import Template
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from functions.config import Config
+from Dao.SentDao import SentDao
+
 
 class MailFunction:
 
-    def sendConfirmationMail(newsmail,sender):
+    def rapprArray(arr):
+        s = ""
+        for item in arr:
+            s += str(item)+","
+        return s[:-1]
+
+    def sendConfirmationMail(newsmail,sender,channels,attachments,newchannels):
+        print(attachments)
+        print(channels)
         msg = MIMEMultipart()
         msg['Subject'] = 'confirm news ' + newsmail.msgid
         msg['From'] = Config.get("newsmail")
@@ -19,8 +29,9 @@ class MailFunction:
             'msgid': newsmail.msgid,
             'publisher' : sender,
             'title' : newsmail.title,
-            'recipients': ' '.join(newsmail.channels),
-            'attachments': ' '.join(newsmail.attachments),
+            'recipients': str(channels),
+            'newchannels': MailFunction.rapprArray(newchannels),
+            'attachments': MailFunction.rapprArray(attachments),
             'expirydate': str(newsmail.expiration_date),
             'body': newsbody
         }
@@ -77,12 +88,28 @@ class MailFunction:
         s.sendmail(Config.get("newsmail"), [sender], msg.as_string())
         s.quit()
 
-    def sendPublishedMail(msgid,sender):
+
+    def sendPublishedMail(newsmail,sender,newchannels,attachments):
         msg = MIMEMultipart()
         msg['Subject'] = 'The news is published'
         msg['From'] = Config.get("newsmail")
+        channels = SentDao.getPublishedChannels(newsmail.msgid)
+        channelsNotPermitted = SentDao.getUnPublishedChannels(newsmail.msgid)
+        channelstext = ""
+        for c in channels:
+            channelstext += c.name + ","
+        if newsmail.is_html():
+            newsbody = newsmail.htmlbody
+        else:
+            newsbody = newsmail.body
         d = {
-            'msgid': msgid
+            'msgid': newsmail.msgid,
+            'channels': channelstext,
+            'newchannels': str(newchannels),
+            'attachments': attachments,
+            'expirydate' : newsmail.expiration_date,
+            'body': newsbody,
+            'channelsnotpermitted': str(channelsNotPermitted)
         }
         with open(Config.get("master_path")+'/templates/publishedMessage.txt', 'r') as f:
             src = Template(f.read())

@@ -1,7 +1,7 @@
 import yaml
 import psycopg2
 import mysql.connector
-import functions.News
+import Objects.News
 from functions.config import Config
 
 def connectionPostgres():

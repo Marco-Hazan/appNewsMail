@@ -1,12 +1,25 @@
 from functions.actionsdb import ActionsDb
-from SentDao import SentDao
-from SenderDao import SenderDao
+from .SentDao import SentDao
+from Objects.News import News
+from .SenderDao import SenderDao
 import time
 import datetime
 
 class newsmailDao:
 
-    def isUnique(self,msgid):
+    def get(msgid):
+        actionsDb = ActionsDb()
+        connection = actionsDb.connectdb()
+        cursor = connection.cursor()
+        sql = "SELECT * FROM newsmail where msgid = %s"
+        val = (msgid,)
+        cursor.execute(sql, val)
+        row = cursor.fetchone()
+        connection.close()
+        return News(msgid,row[1],row[2],row[3],row[4],row[6],row[7])
+
+
+    def isUnique(msgid):
         actionsDb = ActionsDb()
         connection = actionsDb.connectdb()
         cursor = connection.cursor()
@@ -17,12 +30,16 @@ class newsmailDao:
         connection.close()
         return cursor.rowcount == 0
 
-    def insert(self,newsmail):
+    def insert(newsmail,confirmed):
         sender_id = SenderDao.getId(newsmail.sender)
         actionsDb = ActionsDb()
         connection = actionsDb.connectdb()
         cursor = connection.cursor()
-        sql = "INSERT INTO newsmail (msgid,sender,title,body,htmlbody,creation_date,expiration_date) VALUES(%s,%s,%s,%s,%s,%s,%s)"
+        if confirmed:
+            statuscode = 2
+        else:
+            statuscode = 1
+        sql = "INSERT INTO newsmail (msgid,sender,title,body,htmlbody,creation_date,expiration_date,statuscode) VALUES(%s,%s,%s,%s,%s,%s,%s,%s)"
         val = (
             newsmail.msgid,
             sender_id,
@@ -30,7 +47,8 @@ class newsmailDao:
             newsmail.body,
             newsmail.htmlbody,
             newsmail.creation_date,
-            newsmail.expiration_date
+            newsmail.expiration_date,
+            statuscode
             )
         cursor.execute(sql,val)
         connection.commit()

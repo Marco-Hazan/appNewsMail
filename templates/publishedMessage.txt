@@ -1,8 +1,20 @@
-[[The news is published.]]<br>
+The news is published<br>
 <br>
-<br>
+Msgid: $msgid <br>
+Published on: $channels <br>
+Channels created: $newchannels <br>
+Attachments: $attachments <br>
+Expiration date: $expirydate
+Body:
+<p>
+  $body
+</p>
 If you want to delete it you can send a message with the subject 'delete news $msgid' or, if your client support it you can click on this link:
-<a href = "mailto:inewsmail@islab.di.unimi.it?subject=delete%20news%20$msgid">Delete news </a>
+<a href = "mailto:newsmail@islab.di.unimi.it?subject=delete%20news%20$msgid">Delete news </a>
 <br>
 If you want to update the news you can send a message with the subject 'update news $msgid' or, if your client support it you can click on this link:
-<a href = "mailto:inewsmail@islab.di.unimi.it?subject=update%20news%20$msgid">Update news</a>
+<a href = "mailto:newsmail@islab.di.unimi.it?subject=update%20news%20$msgid">Update news</a>
+<br>
+<br>
+The news can't be published on channels $channelsnotpermitted.
+A mail has been sent to their owner, if they agree the news will be published on his channel.

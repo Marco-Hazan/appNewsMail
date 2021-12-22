@@ -17,11 +17,11 @@ class Channel:
 
     @property
     def owner(self):
-        return owner
+        return self.__owner
 
     @property
     def isnew(self):
-        return isnew
+        return self.__isnew
 
     def __eq__(self,other):
         if isinstance(other, self.__class__):
@@ -34,3 +34,6 @@ class Channel:
 
     def __hash__(self):
         return hash(name + str(code))
+
+    def __str__(self):
+        return self.__name

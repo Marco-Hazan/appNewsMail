@@ -1,18 +1,20 @@
-from SenderDao import SenderDao
-from SentDao import SentDao
-from CanSendOnDao import CanSendOnDao
-from ChannelDao import ChannelDao
+from Dao.SenderDao import SenderDao
+from Dao.SentDao import SentDao
+from Dao.CanSendOnDao import CanSendOnDao
+from Dao.ChannelDao import ChannelDao
 from Objects.Channel import Channel
 
 class ChannelHandler:
 
+    #Extract channels
     def extractChannels(sender,channels):
         arr_channels = []
         for chname in channels:
-            if ChannelDao.get(chname) == None:
+            if ChannelDao.getChannel(chname) == None: #if channel is new then assign the ownership to the sender
                 arr_channels.append(Channel(chname,chname,sender,True))
             else:
-                arr_channels.append(ChannelDao.get(chname))
+                arr_channels.append(ChannelDao.getChannel(chname))
+        return arr_channels
 
     def extractLegitChannels(user,channels):
         arr_channels = []
@@ -80,10 +82,13 @@ class ChannelHandler:
     def reject(msgid,channel):
         SentDao.disable(msgid,channel)
 
+    def isLegit(chname,sender):
+        return (ChannelDao.isActive(chname) and (CanSendOnDao.check(sender,chname) or ChannelDao.isOwner(sender,chname)))
+
     def IsChannelRelatedPattern(pattern):
-        return "Enable channel" in pattern or "Disable channel" in pattern or
+        return ("Enable channel" in pattern or "Disable channel" in pattern or
         "Enable user on channel" in pattern or "Disable user on channel" in pattern or
-        "Enable publication" in pattern or "Reject" in pattern
+        "Enable publication" in pattern or "Reject" in pattern)
 
     def ChannelAction(pattern,email):
         if "Enable channel" in pattern:

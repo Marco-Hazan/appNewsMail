@@ -11,28 +11,30 @@ import time
 import datetime
 from Publication import ChannelHandler
 from os import path
-from functions.verify_signature import PyCrypto
 from functions.mailfunctions import MailFunction
 from datetime import timedelta
 from datetime import datetime
 from dateutil import parser
-from functions.News import News
-from newsmailDao import newsmailDao
-from AttachmentDao import AttachmentDao
-from ChannelDao import ChannelDao
-from CanSendOnDao import CanSendOnDao
-from SenderDao import SenderDao
+from Objects.News import News
+from Dao.newsmailDao import newsmailDao
+from Dao.ChannelDao import ChannelDao
+from Dao.CanSendOnDao import CanSendOnDao
+from Dao.SenderDao import SenderDao
+from Dao.SentDao import SentDao
 from bs4 import BeautifulSoup
 from Objects.SendOn import SendOn
 from email.parser import Parser
+from Signature.CheckSig import CheckSig
 
 
 #Funzione che controlla che i canali specificati via mail sono effettivamente esistenti e attivi
+'''
 def checkchannels(channels):
     for c in channels:
         if not ChannelDao.isActive(c):
             return False
     return True
+'''
 
 #Funzione che controlla che il sender sia esistente e attivo
 def checksender(sender):
@@ -48,12 +50,6 @@ def extractBody(email):
         if email.get_content_type() == 'text/plain':
             body = email.get_payload()
     return body
-
-def find_pubkey_loc():
-    for filename in os.listdir("/home/marco/appNewsMail/attachments/"+msgid):
-        if ".asc" in filename:
-            return "/home/marco/appNewsMail/attachments/"+msgid+"/"+filename
-    return None
 
 
 def extractHtml(email):
@@ -87,20 +83,7 @@ def extractAttachments(email,msgid):
                 except OSError:
                     pass
                 if part.get_filename() is not None:
-                    '''
                     filename = part.get_filename()
-                    if filename == "OpenPGP_signature":
-                        global signature_flag
-                        signature_flag = True
-                        signature = str(part.get_payload())
-                    elif ".asc" in filename:
-                        with open("/home/marco/appNewsMail/attachments/"+str(msgid)+"/"+filename, 'a') as f:
-                            try:
-                                f.write(str(part.get_payload()))
-                            except ValueError:
-                                pass
-                    else:
-                    '''
                     attachments.append(filename)
                     with open("/home/marco/appNewsMail/attachments/"+str(msgid)+"/"+filename, 'ab') as f:
                         try:
@@ -113,20 +96,17 @@ def extractAttachments(email,msgid):
 
 
 
-
+'''
 def checkPermissionOnChannel(sender,channels):
     id_sender = SenderDao.getId(sender)
     for ch in channels:
         if not CanSendOnDao.check(id_sender,ch):
             return False
     return True
-
+'''
 
 
 parsermail = Parser()
-dao_news = newsmailDao()
-signature_flag = False
-signature = None
 
 ###
 #Generazione id univoco per newsmail
@@ -136,7 +116,7 @@ while not unique:
     milli_sec = int(round(time.time() * 1000))
     msgid = (str(token) + str(milli_sec)).encode("utf-8")
     msgid = hashlib.sha256(msgid).hexdigest()
-    unique = dao_news.isUnique(msgid)
+    unique = newsmailDao.isUnique(msgid)
 ####
 
 
@@ -144,8 +124,11 @@ s = ""
 ###
 #l'input arrivato da stdin lo salvo all'interno di una stringa che quindi passo al parser di email
 for line in sys.stdin:
-    s += line
+    s += line.replace("\n","\r\n")
 data = s
+
+
+
 email = parsermail.parsestr(s)
 ###
 
@@ -155,6 +138,8 @@ tot_sender = email.get('From')
 cc = email.get('Cc')
 
 sender = tot_sender[tot_sender.find("<")+1:tot_sender.find(">")]
+
+firmata = CheckSig.verifySignature(data,sender)
 
 #estraggo data della mail
 date = email.get('Date')
@@ -174,7 +159,14 @@ if "confirm news" in subject and len(subject.split(" ")) == 3:
     status = newsmailDao.getStatus(receivedMsgid)
     if status is 1 and newsmailDao.getSender(receivedMsgid) == sender:
         newsmailDao.updateStatus(receivedMsgid,2)
-        MailFunction.sendPublishedMail(receivedMsgid,sender)
+        newsmail = newsmailDao.get(receivedMsgid)
+        bodyconfirm = extractBody(email)
+        split_confirm = bodyconfirm.split("\r\n")
+        new_channels = split_confirm[1][split_confirm[1].find(":")+ 1:].split(",")
+        for c in new_channels:
+            ChannelDao.insert(c,sender)
+        attachments = split_confirm[2][split_confirm[2].find(":")+ 1:].split(",")
+        MailFunction.sendPublishedMail(newsmail,sender,new_channels,attachments)
         exit()
     else:
         exit()
@@ -211,29 +203,18 @@ if "update news" in subject and len(subject.split(" ")) == 3:
         exit()
 
 #il subject è valido se rispetta questa modalità: [channel1,channel2,...]{dd/mm/yyyy}subject
-pattern = re.compile("\[[A-Za-z0-9, ]*\]\{[0-9][0-9]\/[0-9][0-9]\/[0-9][0-9][0-9][0-9]\}.+")
+pattern = re.compile("\[[A-Za-z0-9_, ]*\]\{[0-9][0-9]\/[0-9][0-9]\/[0-9][0-9][0-9][0-9]\}.+")
 if pattern.match(subject):
-    channels = subject[subject.find("[")+1:subject.find("]")]
-    channels = channels.split(",")
-    channels = ChannelHandler.extractChannels(channels)
+    channelnames = subject[subject.find("[")+1:subject.find("]")]
+    channelnames = channelnames.split(",")
+    channels = ChannelHandler.extractChannels(sender,channelnames)
     expiration_date = subject[subject.find("{")+1:subject.find("}")]
     expiration_date = datetime.strptime(expiration_date,'%d/%m/%Y')
     expiration_date = expiration_date.strftime("%Y-%m-%d %H:%M")
-    pub_date = None
     title = subject[subject.find("}")+1:]
 else:
     MailFunction.sendSubjectErrorMail(tot_sender,subject)
     exit()
-'''
-legit_channels = ChannelHandler.extractLegitChannels(channels)
-notlegit_channels = ChannelHandler.extractNotPermittedChannels(sender,channels)
-new_channels = ChannelHandler.extractNewChannels(channels)
-'''
-
-for c in new_channels:
-    ChannelHandler.createChannel(c,sender)
-    MailFunction.sendCreatedChannel()
-
 
 #estraggo body
 body = extractBody(email)
@@ -242,19 +223,30 @@ if bodyhtml is not None:
     body = None
 attachments = extractAttachments(email,msgid)
 newsmail = News(msgid,sender,title,body,bodyhtml,creation_date,expiration_date)
-dao_news.insert(newsmail)
-for c in channels:
-    sendon = SendOn(newsmail,c)
-    action = sendon.defineAction()
-    action.act()
-MailFunction.sendConfirmationMail(newsmail,sender)
+if firmata:
+    newsmailDao.insert(newsmail,True)
+else:
+    newsmailDao.insert(newsmail,False)
 
-'''
-if signature_flag == True:
-    public_key_loc = find_pubkey_loc()
-    public_key = str(email.get('Autocrypt')).split("keydata=")[1]
-    valid_signature = PyCrypto.verify_sign(public_key,signature,data)
-    if valid_signature:
-        pass
-        #print("FIRMA VALIDATA OH CAZZO")
-'''
+
+new_channels = []
+channelsnotpermitted = []
+
+for c in channels:
+    if c.isnew:
+        new_channels.append(c.name)
+        if firmata:
+            ChannelDao.insert(c.name,c.owner)
+            SentDao.insert(msgid,c.name,True)
+    elif ChannelHandler.isLegit(c.name,sender):
+        SentDao.insert(msgid,c.name,True)
+    elif not CanSendOnDao.check(user,c):
+        channelsnotpermitted.append(c.name)
+        SentDao.insert(msgid,c.name,False)
+        MailFunction.sendRequestToPublish(self.channel,self.channel.owner,self.newsmail)
+
+
+if firmata:
+    MailFunction.sendPublishedMail(newsmail,sender,new_channels,channelsnotpermitted)
+else:
+    MailFunction.sendConfirmationMail(newsmail,sender,channelnames,attachments,new_channels)

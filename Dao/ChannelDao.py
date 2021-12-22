@@ -1,5 +1,6 @@
 from functions.actionsdb import ActionsDb
 from Objects.Channel import Channel
+from .SenderDao import SenderDao
 
 
 class ChannelDao:
@@ -10,14 +11,14 @@ class ChannelDao:
         actionsDb = ActionsDb()
         connection = actionsDb.connectdb()
         cursor = connection.cursor()
-        sql = "SELECT * FROM channel where name = %s"
-        val = (channel,)
+        sql = "SELECT name,is_active,owner FROM channel where name = %s"
+        val = (name,)
         cursor.execute(sql, val)
         record = cursor.fetchone()
         connection.close()
-        if cursor == None:
+        if record == None:
             return None
-        return Channel(record[0],record[1],record[2],record[3])
+        return Channel(record[0],record[1],record[2],False)
 
     def exists(channel):
         actionsDb = ActionsDb()
@@ -67,7 +68,8 @@ class ChannelDao:
         connection = actionsDb.connectdb()
         cursor = connection.cursor()
         sql = "INSERT INTO channel (name,owner) VALUES(%s,%s)"
-        val = (name,owner)
+        ownerid = SenderDao.getId(owner)
+        val = (name,ownerid)
         cursor.execute(sql,val)
         connection.commit()
         connection.close()
@@ -91,3 +93,16 @@ class ChannelDao:
         cursor.execute(sql,val)
         connection.commit()
         connection.close()
+
+    def getByCode(code):
+        actionsDb = ActionsDb()
+        connection = actionsDb.connectdb()
+        cursor = connection.cursor()
+        sql = "SELECT name,is_active,owner FROM channel where code = %s"
+        val = (code,)
+        cursor.execute(sql, val)
+        record = cursor.fetchone()
+        connection.close()
+        if cursor == None:
+            return None
+        return Channel(record[0],record[1],record[2],False)
