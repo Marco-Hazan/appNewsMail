@@ -165,6 +165,7 @@ if "confirm news" in subject and len(subject.split(" ")) == 3:
         new_channels = split_confirm[1][split_confirm[1].find(":")+ 1:].split(",")
         for c in new_channels:
             ChannelDao.insert(c,sender)
+            CanSendOnDao.insert(sender,c);
         attachments = split_confirm[2][split_confirm[2].find(":")+ 1:].split(",")
         MailFunction.sendPublishedMail(newsmail,sender,new_channels,attachments)
         exit()
@@ -237,6 +238,7 @@ for c in channels:
         new_channels.append(c.name)
         if firmata:
             ChannelDao.insert(c.name,c.owner)
+            CanSendOnDao.insert(sender,c.name);
             SentDao.insert(msgid,c.name,True)
     elif ChannelHandler.isLegit(c.name,sender):
         SentDao.insert(msgid,c.name,True)

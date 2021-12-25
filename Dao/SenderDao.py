@@ -16,6 +16,7 @@ class SenderDao:
         return cursor.rowcount == 1
 
     def getId(sender):
+        print(sender)
         actionsDb = ActionsDb()
         connection = actionsDb.connectdb()
         cursor = connection.cursor()

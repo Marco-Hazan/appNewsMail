@@ -42,6 +42,18 @@ class ChannelDao:
         connection.close()
         return cursor.rowcount == 1
 
+    def isOwner(user,channel):
+        actionsDb = ActionsDb()
+        connection = actionsDb.connectdb()
+        cursor = connection.cursor()
+        userid = SenderDao.getId(user)
+        sql = "SELECT * FROM channel where name = %s and owner = %s"
+        val = (channel,userid)
+        cursor.execute(sql, val)
+        records = cursor.fetchall()
+        connection.close()
+        return cursor.rowcount == 1
+
     def isntActive(channel):
         actionsDb = ActionsDb()
         connection = actionsDb.connectdb()
