@@ -18,7 +18,7 @@ class ChannelDao:
         connection.close()
         if record == None:
             return None
-        return Channel(record[0],record[1],record[2],False)
+        return Channel(record[0],record[1],SenderDao.getUsername(record[2]),False)
 
     def exists(channel):
         actionsDb = ActionsDb()
@@ -86,12 +86,23 @@ class ChannelDao:
         connection.commit()
         connection.close()
 
+    def delete(name,owner):
+        actionsDb = ActionsDb()
+        connection = actionsDb.connectdb()
+        cursor = connection.cursor()
+        sql = "DELETE FROM channel WHERE name = %s AND owner = %s"
+        ownerid = SenderDao.getId(owner)
+        val = (name,ownerid)
+        cursor.execute(sql,val)
+        connection.commit()
+        connection.close()
+
     def enable(name):
         actionsDb = ActionsDb()
         connection = actionsDb.connectdb()
         cursor = connection.cursor()
         sql = "UPDATE CHANNEL SET is_active = TRUE WHERE code = %s"
-        val = (getCode(name),)
+        val = (ChannelDao.getCode(name),)
         cursor.execute(sql,val)
         connection.commit()
         connection.close()
@@ -101,7 +112,9 @@ class ChannelDao:
         connection = actionsDb.connectdb()
         cursor = connection.cursor()
         sql = "UPDATE CHANNEL SET is_active = FALSE WHERE code = %s"
-        val = (getCode(name),)
+        print(name)
+        print(ChannelDao.getCode('islab'))
+        val = (ChannelDao.getCode(name),)
         cursor.execute(sql,val)
         connection.commit()
         connection.close()

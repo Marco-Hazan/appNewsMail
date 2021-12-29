@@ -2,6 +2,7 @@ import smtplib
 from string import Template
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.message  import EmailMessage
 from functions.config import Config
 from Dao.SentDao import SentDao
 
@@ -15,8 +16,6 @@ class MailFunction:
         return s[:-1]
 
     def sendConfirmationMail(newsmail,sender,channels,attachments,newchannels):
-        print(attachments)
-        print(channels)
         msg = MIMEMultipart()
         msg['Subject'] = 'confirm news ' + newsmail.msgid
         msg['From'] = Config.get("newsmail")
@@ -89,12 +88,11 @@ class MailFunction:
         s.quit()
 
 
-    def sendPublishedMail(newsmail,sender,newchannels,attachments):
+    def sendPublishedMail(newsmail,sender,newchannels,attachments,channelsNotPermitted):
         msg = MIMEMultipart()
         msg['Subject'] = 'The news is published'
         msg['From'] = Config.get("newsmail")
         channels = SentDao.getPublishedChannels(newsmail.msgid)
-        channelsNotPermitted = SentDao.getUnPublishedChannels(newsmail.msgid)
         channelstext = ""
         for c in channels:
             channelstext += c.name + ","
@@ -169,17 +167,19 @@ class MailFunction:
         s = smtplib.SMTP(Config.get("smtp"))
         s.sendmail(Config.get("newsmail"), [sender], msg.as_string())
 
-    def sendRequestToPublish(channel,sender,newsmail):
+    def sendRequestToPublish(channel,owner,newsmail,attachments):
+        print(newsmail.msgid)
         msg = MIMEMultipart()
         msg['Subject'] = 'Request to publish on channel '+ channel.name
+        print(msg['Subject'])
         msg['From'] = Config.get("newsmail")
         if not newsmail.is_html:
             newsbody = newsmail.body
         else:
             newsbody = newsmail.htmlbody
         d = {
-            'channel': channel,
-            'msgid': msgid,
+            'channel': channel.name,
+            'msgid': newsmail.msgid,
             'publisher': newsmail.sender,
             'body': newsbody,
             'attachments': str(attachments)
@@ -189,5 +189,6 @@ class MailFunction:
             updatedMessage = src.substitute(d)
         msg.attach(MIMEText(updatedMessage,'html'))
         s = smtplib.SMTP(Config.get("smtp"))
-        s.sendmail(Config.get("newsmail"), [sender], msg.as_string())
+        print(owner)
+        s.sendmail(Config.get("newsmail"),['marco@islab.di.unimi.it'], msg.as_string())
         s.quit()

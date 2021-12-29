@@ -35,7 +35,8 @@ class CanSendOnDao:
         cursor = connection.cursor()
         sql = "DELETE FROM cansendon WHERE channel = %s AND appuser = %s"
         code = ChannelDao.getCode(channel)
-        val = (code,sender)
+        idsender = SenderDao.getId(sender)
+        val = (code,idsender)
         cursor.execute(sql,val)
         connection.commit()
         connection.close()

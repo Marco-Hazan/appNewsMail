@@ -85,3 +85,14 @@ class SentDao:
         for row in records:
             channels.append(ChannelDao.getByCode(row[0]))
         return channels
+
+    def delete(msgid,channel):
+        actionsDb = ActionsDb()
+        connection = actionsDb.connectdb()
+        cursor = connection.cursor()
+        sql = "DELETE FROM senton WHERE newsmail = %s AND channel = %s"
+        code = ChannelDao.getCode(channel)
+        val = (msgid,code)
+        cursor.execute(sql,val)
+        connection.commit()
+        connection.close()

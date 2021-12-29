@@ -80,6 +80,7 @@ def extractAttachments(email,msgid):
             if part.get_content_type() != 'text/plain' and part.get_content_type() != 'multipart/mixed' and part.get_content_type != 'text/html' and part.get_content_type() != 'multipart/alternative':
                 try:
                     os.mkdir("/home/marco/appNewsMail/attachments/"+str(msgid))
+                    os.system("chmod 777 /home/marco/appNewsMail/attachments/"+str(msgid))
                 except OSError:
                     pass
                 if part.get_filename() is not None:
@@ -87,6 +88,7 @@ def extractAttachments(email,msgid):
                     attachments.append(filename)
                     with open("/home/marco/appNewsMail/attachments/"+str(msgid)+"/"+filename, 'ab') as f:
                         try:
+                            os.system("chmod 777 /home/marco/appNewsMail/attachments/"+str(msgid)+"/"+filename)
                             message_bytes = base64.b64decode(str(part.get_payload()))
                             f.write(message_bytes)
                         except ValueError:
@@ -107,7 +109,6 @@ def checkPermissionOnChannel(sender,channels):
 
 
 parsermail = Parser()
-
 ###
 #Generazione id univoco per newsmail
 unique = False
@@ -118,6 +119,7 @@ while not unique:
     msgid = hashlib.sha256(msgid).hexdigest()
     unique = newsmailDao.isUnique(msgid)
 ####
+
 
 
 s = ""
@@ -131,6 +133,7 @@ data = s
 
 email = parsermail.parsestr(s)
 ###
+
 
 ###
 #estraggo sender
@@ -154,6 +157,13 @@ if not valid_sender:
 
 #estraggo il subject della mail
 subject = email.get('Subject')
+
+if ChannelHandler.IsChannelRelatedPattern(subject):
+    ChannelHandler.ChannelAction(subject,email)
+    exit()
+
+
+
 if "confirm news" in subject and len(subject.split(" ")) == 3:
     receivedMsgid = subject.split(" ")[2]
     status = newsmailDao.getStatus(receivedMsgid)
@@ -233,6 +243,7 @@ else:
 new_channels = []
 channelsnotpermitted = []
 
+
 for c in channels:
     if c.isnew:
         new_channels.append(c.name)
@@ -242,13 +253,13 @@ for c in channels:
             SentDao.insert(msgid,c.name,True)
     elif ChannelHandler.isLegit(c.name,sender):
         SentDao.insert(msgid,c.name,True)
-    elif not CanSendOnDao.check(user,c):
+    elif not CanSendOnDao.check(sender,c.name):
         channelsnotpermitted.append(c.name)
         SentDao.insert(msgid,c.name,False)
-        MailFunction.sendRequestToPublish(self.channel,self.channel.owner,self.newsmail)
+        MailFunction.sendRequestToPublish(c,c.owner,newsmail,attachments)
 
 
 if firmata:
-    MailFunction.sendPublishedMail(newsmail,sender,new_channels,channelsnotpermitted)
+    MailFunction.sendPublishedMail(newsmail,sender,new_channels,attachments,channelsnotpermitted)
 else:
     MailFunction.sendConfirmationMail(newsmail,sender,channelnames,attachments,new_channels)

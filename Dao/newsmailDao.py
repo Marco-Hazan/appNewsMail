@@ -7,7 +7,7 @@ import datetime
 
 class newsmailDao:
 
-    def get(msgid):
+    def getStatus(msgid):
         actionsDb = ActionsDb()
         connection = actionsDb.connectdb()
         cursor = connection.cursor()
@@ -16,7 +16,31 @@ class newsmailDao:
         cursor.execute(sql, val)
         row = cursor.fetchone()
         connection.close()
-        return News(msgid,row[1],row[2],row[3],row[4],row[6],row[7])
+        return row[5]
+
+    def getLast(username):
+        actionsDb = ActionsDb()
+        connection = actionsDb.connectdb()
+        cursor = connection.cursor()
+        sql = "SELECT * FROM newsmail where sender = %s ORDER BY creation_date DESC"
+        idsender = SenderDao.getId(username)
+        val = (idsender,)
+        cursor.execute(sql, val)
+        row = cursor.fetchone()
+        connection.close()
+        return News(row[0],row[1],row[2],row[3],row[4],row[6],row[7])
+
+    def get(msgid):
+        actionsDb = ActionsDb()
+        connection = actionsDb.connectdb()
+        cursor = connection.cursor()
+        sql = "SELECT * FROM newsmail where msgid = %s"
+        val = (msgid,)
+        cursor.execute(sql, val)
+        row = cursor.fetchone()
+        sender = SenderDao.getUsername(row[1])
+        connection.close()
+        return News(msgid,sender,row[2],row[3],row[4],row[6],row[7])
 
 
     def isUnique(msgid):
