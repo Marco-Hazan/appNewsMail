@@ -13,11 +13,13 @@ class News:
 
     def __str__(self):
         s = "sender:"+self.__sender+"\ntitle:"+self.__title + "\n";
-        s += "pub_date: "+ self.__pub_date
-        for c in self.__channels:
-            s += c + "\t"
         s += "\n"+self.__body;
         return s
+
+    def __eq__(self,other):
+        if other is None:
+            return False
+        return other.msgid is not self.msgid
 
 
     @property

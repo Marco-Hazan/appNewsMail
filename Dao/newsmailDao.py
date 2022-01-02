@@ -30,7 +30,21 @@ class newsmailDao:
         connection.close()
         return News(row[0],row[1],row[2],row[3],row[4],row[6],row[7])
 
+    def getLastByTitle(title):
+        news = None
+        actionsDb = ActionsDb()
+        connection = actionsDb.connectdb()
+        cursor = connection.cursor()
+        sql = "SELECT * FROM newsmail where title = %s ORDER BY creation_date DESC"
+        val = (title,)
+        cursor.execute(sql, val)
+        row = cursor.fetchone()
+        connection.close()
+        if row is not None:
+            return News(row[0],SenderDao.getUsername(row[1]),row[2],row[3],row[4],row[6],row[7])
+
     def get(msgid):
+        news = None
         actionsDb = ActionsDb()
         connection = actionsDb.connectdb()
         cursor = connection.cursor()
@@ -38,9 +52,11 @@ class newsmailDao:
         val = (msgid,)
         cursor.execute(sql, val)
         row = cursor.fetchone()
-        sender = SenderDao.getUsername(row[1])
-        connection.close()
-        return News(msgid,sender,row[2],row[3],row[4],row[6],row[7])
+        if row is not None:
+            sender = SenderDao.getUsername(row[1])
+            connection.close()
+            news = News(msgid,sender,row[2],row[3],row[4],row[6],row[7])
+        return news
 
 
     def isUnique(msgid):
@@ -127,6 +143,26 @@ class newsmailDao:
         cursor = connection.cursor()
         sql = "UPDATE newsmail set body = %s,htmlbody = %s where msgid = %s"
         val = (body,htmlbody,msgid)
+        cursor.execute(sql,val)
+        connection.commit()
+        connection.close()
+
+    def updateTitle(msgid,title):
+        actionsDb = ActionsDb()
+        connection = actionsDb.connectdb()
+        cursor = connection.cursor()
+        sql = "UPDATE newsmail set title = %s where msgid = %s"
+        val = (title,msgid)
+        cursor.execute(sql,val)
+        connection.commit()
+        connection.close()
+
+    def updateExpirationDate(msgid,expiration_date):
+        actionsDb = ActionsDb()
+        connection = actionsDb.connectdb()
+        cursor = connection.cursor()
+        sql = "UPDATE newsmail set expiration_date = %s where msgid = %s"
+        val = (expiration_date,msgid)
         cursor.execute(sql,val)
         connection.commit()
         connection.close()

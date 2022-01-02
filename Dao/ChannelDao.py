@@ -6,7 +6,6 @@ from .SenderDao import SenderDao
 class ChannelDao:
 
 
-
     def getChannel(name):
         actionsDb = ActionsDb()
         connection = actionsDb.connectdb()
@@ -75,6 +74,16 @@ class ChannelDao:
         record = cursor.fetchone()
         return record[0]
 
+    def getName(code):
+        actionsDb = ActionsDb()
+        connection = actionsDb.connectdb()
+        cursor = connection.cursor()
+        sql = "SELECT name FROM channel where code = %s"
+        val = (code,)
+        cursor.execute(sql,val)
+        record = cursor.fetchone()
+        return record[0]
+
     def insert(name,owner):
         actionsDb = ActionsDb()
         connection = actionsDb.connectdb()
@@ -131,3 +140,13 @@ class ChannelDao:
         if cursor == None:
             return None
         return Channel(record[0],record[1],record[2],False)
+
+    def updateName(oldname,newname):
+        actionsDb = ActionsDb()
+        connection = actionsDb.connectdb()
+        cursor = connection.cursor()
+        sql = "UPDATE CHANNEL SET name = %s WHERE code = %s"
+        val = (ChannelDao.getCode(oldname),newname)
+        cursor.execute(sql,val)
+        connection.commit()
+        connection.close()

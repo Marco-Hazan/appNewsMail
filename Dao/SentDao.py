@@ -57,7 +57,7 @@ class SentDao:
         cursor.execute(sql,val)
         records = cursor.fetchall()
         for row in records:
-            channels.append({"chname":row[0],"enable":row[1]})
+            channels.append({"chname":ChannelDao.getName(row[0]),"enable":row[1]})
         return channels
 
     def getPublishedChannels(msgid):
@@ -95,4 +95,3 @@ class SentDao:
         val = (msgid,code)
         cursor.execute(sql,val)
         connection.commit()
-        connection.close()
