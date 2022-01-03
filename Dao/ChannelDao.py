@@ -6,6 +6,20 @@ from .SenderDao import SenderDao
 class ChannelDao:
 
 
+    def getUserChannel(user):
+        channels = []
+        actionsDb = ActionsDb()
+        connection = actionsDb.connectdb()
+        cursor = connection.cursor()
+        sql = "SELECT name,is_active,owner FROM channel where owner = %s"
+        val = (SenderDao.getId(user),)
+        cursor.execute(sql, val)
+        rows = cursor.fetchall()
+        for record in rows:
+            channels.append(Channel(record[0],record[1],SenderDao.getUsername(record[2]),False))
+        connection.close()
+        return channels
+
     def getChannel(name):
         actionsDb = ActionsDb()
         connection = actionsDb.connectdb()

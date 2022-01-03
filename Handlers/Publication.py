@@ -4,6 +4,8 @@ from Dao.CanSendOnDao import CanSendOnDao
 from Dao.ChannelDao import ChannelDao
 from Dao.newsmailDao import newsmailDao
 from Objects.Channel import Channel
+from functions.extract import Extraction
+from functions.mailfunctions import MailFunction
 
 def extractBody(email):
     body = ""
@@ -67,8 +69,9 @@ class ChannelHandler:
                 CanSendOnDao.delete(u,channel)
 
 
-    def EnableOnceNews(msgid,channel):
-        SentDao.enable(msgid,channel)
+    def EnableNews(user,channel,title_news):
+        newsmail = newsmailDao.getByTitleAndUser(user,title_news)
+        SentDao.enable(newsmail.msgid,channel)
 
 
 
@@ -99,11 +102,19 @@ class ChannelHandler:
         if channel.owner == sender:
             ChannelDao.updateName(oldname,newname)
 
+    def list_channels(sender):
+        channels = ChannelDao.getUserChannel(sender)
+        cansend_channels = CanSendOnDao.getChannels(sender)
+        for c in cansend_channels:
+            if c not in channels:
+                channels.append(c)
+        MailFunction.sendListOfChannels(sender,channels)
+
     def IsChannelRelatedPattern(pattern):
         return ("Create channel" in pattern or "Delete channel" in pattern or
         "Enable channel" in pattern or "Disable channel" in pattern or
         "Enable user on channel" in pattern or "Disable user on channel" in pattern or
-        "Enable publication" in pattern or "Reject" in pattern or "Update channel name" in pattern)
+        "Enable publication" in pattern or "Reject" in pattern or "Update channel name" in pattern or "List channel")
 
     def ChannelAction(pattern,email):
         if "Create channel" in pattern:
@@ -129,12 +140,14 @@ class ChannelHandler:
             ChannelHandler.DisableUsersOnChannel(users,extractBody(email).strip())
             return True
         elif "Enable publication" in pattern:
-            if len(pattern.split(" ")) == 4 and ("once" in pattern.split(" ")[2]) and len(pattern.split(" ")[3]) == 64:
-                ChannelHandler.EnableOnceNews(pattern.split(" ")[3],extractBody(email).strip())
+            user = str(email.get('Cc'))
+            if len(pattern.split(" ")) == 4 and ("once" in pattern.split(" ")[2]):
+                ChannelHandler.EnableNews(user,pattern.split(" ")[3],extractBody(email).strip())
                 return True
-            elif len(pattern.split(" ")) == 4 and ("always" in pattern.split(" ")[2]) and len(pattern.split(" ")[3]) == 64:
-                newsmail = newsmailDao.get(pattern.split(" ")[3])
-                ChannelHandler.EnableUserOnChannel(newsmail.sender,extractBody(email).strip())
+            elif len(pattern.split(" ")) == 4 and ("always" in pattern.split(" ")[2]):
+                sender = str(email.get('Cc'))
+                ChannelHandler.EnableNews(user,pattern.split(" ")[3],extractBody(email).strip())
+                ChannelHandler.EnableUserOnChannel(user,pattern.split(" ")[3])
                 return True
         elif "Reject" in pattern and len(pattern.split(" ")) == 3 and len(pattern.split(" ")[2]) == 64:
             ChannelHandler.reject(pattern.split(" ")[2],extractBody(email).strip())
@@ -142,4 +155,7 @@ class ChannelHandler:
         elif "Update channel name" in pattern and len(pattern.split(" ")) == 4:
             sender = Extraction.extractSender(email)
             ChannelHandler.updateChannelName(sender,pattern.split(" ")[3],extractBody(email).strip())
+        elif "List channel" in pattern:
+            sender = Extraction.extractSender(email)
+            ChannelHandler.list_channels(sender)
         return None

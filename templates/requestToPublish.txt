@@ -1,15 +1,15 @@
 The user <b>$publisher</b> wants to publish on your channel <b>$channel</b>. <br>
 Here's the news: <br>
 <p>
- [msgid]: $msgid <br>
+ [Title]: $title <br>
  [Publisher]: $publisher <br>
  [body]: <br> $body
  [attachments]: $attachments
 </p>
 What do you want to do?<br>
-<a href = "mailto:newsmail@islab.di.unimi.it?subject=Reject%20publication%20$msgid&body=$channel"> Reject </a>
+<a href = "mailto:newsmail@islab.di.unimi.it?subject=Reject%20publication%20$channel&cc=$publisher&body=$title"> Reject </a>
 (The news will be rejected)<br>
-<a href = "mailto:newsmail@islab.di.unimi.it?subject=Enable%20publication%20once%20$msgid&body=$channel">Enable once </a>
+<a href = "mailto:newsmail@islab.di.unimi.it?subject=Enable%20publication%20once%20$channel&cc=$publisher&body=$title">Enable once </a>
 (Only for this time this user is allowed to publish on this channel)<br>
-<a href = "mailto:newsmail@islab.di.unimi.it?subject=Enable%20publication%20always%20$msgid&body=$channel">Enable always </a>
+<a href = "mailto:newsmail@islab.di.unimi.it?subject=Enable%20publication%20always%20$channel&cc=$publisher&body=$title">Enable always </a>
 (This user will be allowed to publish on this channel until you decide otherwise)<br>

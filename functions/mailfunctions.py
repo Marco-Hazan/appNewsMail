@@ -178,8 +178,8 @@ class MailFunction:
         else:
             newsbody = newsmail.htmlbody
         d = {
+            'title': newsmail.title,
             'channel': channel.name,
-            'msgid': newsmail.msgid,
             'publisher': newsmail.sender,
             'body': newsbody,
             'attachments': str(attachments)
@@ -191,4 +191,26 @@ class MailFunction:
         s = smtplib.SMTP(Config.get("smtp"))
         print(owner)
         s.sendmail(Config.get("newsmail"),['marco@islab.di.unimi.it'], msg.as_string())
+        s.quit()
+
+    def sendListOfChannels(rcpt,channels):
+        msg = MIMEMultipart()
+        msg['Subject'] = 'List of your channels'
+        msg['From'] = Config.get("newsmail")
+        string_channels = ''
+        for c in channels:
+            if c.owner == rcpt:
+                owner = 'YOU'
+            else:
+                owner = c.owner
+            string_channels += '<tr><td>'+c.name+'</td><td>'+owner+'</td></tr>'
+        d = {
+            'channels': string_channels
+        }
+        with open(Config.get("master_path")+'/templates/listChannels.txt', 'r') as f:
+            src = Template(f.read())
+            updatedMessage = src.substitute(d)
+        msg.attach(MIMEText(updatedMessage,'html'))
+        s = smtplib.SMTP(Config.get("smtp"))
+        s.sendmail(Config.get("newsmail"),rcpt, msg.as_string())
         s.quit()

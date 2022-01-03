@@ -40,3 +40,18 @@ class CanSendOnDao:
         cursor.execute(sql,val)
         connection.commit()
         connection.close()
+
+    def getChannels(user):
+        channels = []
+        actionsDb = ActionsDb()
+        connection = actionsDb.connectdb()
+        cursor = connection.cursor()
+        userid = SenderDao.getId(user)
+        sql = "SELECT channel FROM cansendon where appuser = %s"
+        val = (userid,)
+        cursor.execute(sql, val)
+        records = cursor.fetchall()
+        for row in records:
+            channels.append(ChannelDao.getByCode(row[0]))
+        connection.close()
+        return channels

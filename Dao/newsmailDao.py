@@ -166,3 +166,16 @@ class newsmailDao:
         cursor.execute(sql,val)
         connection.commit()
         connection.close()
+
+    def getByTitleAndUser(user,title):
+        actionsDb = ActionsDb()
+        connection = actionsDb.connectdb()
+        cursor = connection.cursor()
+        sql = "SELECT * FROM newsmail where sender = %s AND title = %s ORDER BY creation_date DESC"
+        val = (SenderDao.getId(user),title)
+        cursor.execute(sql, val)
+        row = cursor.fetchone()
+        connection.close()
+        if row is not None:
+            return News(row[0],SenderDao.getUsername(row[1]),row[2],row[3],row[4],row[6],row[7])
+        return None
