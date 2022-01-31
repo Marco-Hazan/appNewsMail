@@ -1,0 +1,5 @@
+[[The news $msgid is updated]]
+<br><br>
+[body]: $body
+<br>
+[attachments]: $attachments

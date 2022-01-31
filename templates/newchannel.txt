@@ -1,0 +1,4 @@
+The channel <b>$channel</b> has been created <br><br>
+
+If you want to delete it because you didn't want to create it click here:<br>
+<a href= "mailto:newsmail@islab.di.unimi.it?subject=delete%20channel&body=$channel"

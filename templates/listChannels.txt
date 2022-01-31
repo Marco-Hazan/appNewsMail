@@ -1,0 +1,12 @@
+Here's your channels:
+<br>
+
+<table>
+<th>
+  Channel
+</th>
+<th>
+  Owner
+</th>
+$channels
+</table>
