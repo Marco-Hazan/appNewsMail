@@ -114,7 +114,7 @@ else:
 body = None
 bodyhtml = Extraction.extractHtml(email)
 if bodyhtml is None:
-    bodyhtml = markdown.markdown(Extraction.extractBody(email)).replace("\n","<br>")
+    bodyhtml = markdown.markdown(Extraction.extractBody(email))
 attachments = Extraction.extractAttachments(email,msgid)
 newsmail = News(msgid,sender,title,body,bodyhtml,creation_date,expiration_date)
 if firmata:
