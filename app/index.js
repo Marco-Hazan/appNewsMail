@@ -15,7 +15,7 @@ const config_db = {
   host: config.database.host
 }
 
-const sql = "select S.username AS publisher,N.msgid,N.title,N.body,N.htmlbody,N.creation_date FROM newsmail AS N JOIN appuser AS S ON S.id = N.sender JOIN SENTON AS SO ON SO.newsmail = N.msgid JOIN channel AS C ON C.code = SO.channel WHERE C.name = $1 AND SO.enable = TRUE AND C.is_active = TRUE AND N.expiration_date > $2 ";
+const sql = "select S.username AS publisher,N.msgid,N.title,N.body,N.htmlbody,N.creation_date FROM newsmail AS N JOIN appuser AS S ON S.id = N.sender JOIN SENTON AS SO ON SO.newsmail = N.msgid JOIN channel AS C ON C.code = SO.channel WHERE C.name = $1 AND SO.enable = TRUE AND C.is_active = TRUE AND (N.expiration_date > $2 OR N.expiration_date IS NULL) ";
 
 const client = new pg.Client(config_db);
 
@@ -44,6 +44,7 @@ function queryChannel(channel,callback) {
     values = [channel,date];
     client.query(sql,values)
         .then(res => {
+          console.log(res);
             if(res.rowCount == 0){
               return callback({status: 'Disabled or not exists'});
             }
