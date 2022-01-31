@@ -1,4 +1,5 @@
 import email
+import markdown
 import sys
 import re
 import shutil
@@ -55,7 +56,6 @@ s = ""
 for line in sys.stdin:
     s += line.replace("\n","\r\n")
 data = s
-
 parsermail = Parser()
 email = parsermail.parsestr(data)
 ###
@@ -86,27 +86,35 @@ if ChannelHandler.IsChannelRelatedPattern(subject) and firmata:
 
 if NewsHandler.isNewsRelated(subject):
     NewsHandler.newsAction(email,subject)
-
 #il subject è valido se rispetta questa modalità: [channel1,channel2,...]{dd/mm/yyyy}subject
-pattern = re.compile("\[[A-Za-z0-9_, ]*\]\{[0-9][0-9]\/[0-9][0-9]\/[0-9][0-9][0-9][0-9]\}.+")
-if pattern.match(subject):
+valid_pattern1 = "\[[A-Za-z0-9_, ]*\]\{[0-9][0-9]\/[0-9][0-9]\/[0-9][0-9][0-9][0-9]\}.+"
+valid_pattern2 = "\[[A-Za-z0-9_, ]*\].+"
+
+pattern1 = re.compile(valid_pattern1)
+pattern2 = re.compile(valid_pattern2)
+if pattern1.match(subject) or pattern2.match(subject):
     msgid = generaId()
     channelnames = subject[subject.find("[")+1:subject.find("]")]
     channelnames = channelnames.split(",")
     channels = ChannelHandler.extractChannels(sender,channelnames)
-    expiration_date = subject[subject.find("{")+1:subject.find("}")]
-    expiration_date = datetime.strptime(expiration_date,'%d/%m/%Y')
-    expiration_date = expiration_date.strftime("%Y-%m-%d %H:%M")
-    title = subject[subject.find("}")+1:]
+    if pattern1.match(subject):
+        expiration_date = subject[subject.find("{")+1:subject.find("}")]
+        expiration_date = datetime.strptime(expiration_date,'%d/%m/%Y')
+        expiration_date = expiration_date.strftime("%Y-%m-%d %H:%M")
+        title = subject[subject.find("}")+1:]
+    else:
+        expiration_date = None
+        title = subject[subject.find("]")+1:]
 else:
     MailFunction.sendSubjectErrorMail(sender,subject)
     exit()
 
 #estraggo body
-body = Extraction.extractBody(email)
+#body = Extraction.extractBody(email)
+body = None
 bodyhtml = Extraction.extractHtml(email)
-if bodyhtml is not None:
-    body = None
+if bodyhtml is None:
+    bodyhtml = markdown.markdown(Extraction.extractBody(email)).replace("\n","<br>")
 attachments = Extraction.extractAttachments(email,msgid)
 newsmail = News(msgid,sender,title,body,bodyhtml,creation_date,expiration_date)
 if firmata:

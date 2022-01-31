@@ -114,7 +114,7 @@ class ChannelHandler:
         return ("Create channel" in pattern or "Delete channel" in pattern or
         "Enable channel" in pattern or "Disable channel" in pattern or
         "Enable user on channel" in pattern or "Disable user on channel" in pattern or
-        "Enable publication" in pattern or "Reject" in pattern or "Update channel name" in pattern or "List channel")
+        "Enable publication" in pattern or "Reject" in pattern or "Update channel name" in pattern or "List channel" in pattern)
 
     def ChannelAction(pattern,email):
         if "Create channel" in pattern:

@@ -62,7 +62,6 @@ class TestNews(unittest.TestCase):
         news = newsmailDao.getLastByTitle('Titolo News Prova')
         print(news)
         self.assertEqual(newsmailDao.getStatus(news.msgid),2)
-        self.assertFalse(news.is_html())
         newsmailDao.deleteNews(news.msgid)
         news2 = newsmailDao.getLastByTitle('Titolo News Prova')
         self.assertNotEqual(news2,news)
@@ -85,7 +84,6 @@ class TestNews(unittest.TestCase):
         sent_channels = SentDao.getChannels(news.msgid)
         self.assertEqual(len(sent_channels),1)
         self.assertEqual(sent_channels[0].get("chname"),'islab')
-        self.assertFalse(news.is_html())
         newsmailDao.deleteNews(news.msgid)
         news2 = newsmailDao.getLastByTitle('Titolo News Prova 2')
         self.assertNotEqual(news2,news)
@@ -112,7 +110,6 @@ class TestNews(unittest.TestCase):
         self.assertEqual(newchannel.owner,'marco@islab.di.unimi.it')
         self.assertEqual(len(sent_channels),2)
         self.assertEqual(sent_channels[0].get("chname"),'islab')
-        self.assertTrue(news.is_html())
         newsmailDao.deleteNews(news.msgid)
         news2 = newsmailDao.getLastByTitle('Titolo News Prova 3')
         self.assertNotEqual(news2,news)
@@ -124,7 +121,9 @@ class TestNews(unittest.TestCase):
         newchannel = ChannelDao.getChannel('newchannel')
         self.assertIsNone(newchannel)
 
+
     
+
 
 
 

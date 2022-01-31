@@ -51,6 +51,7 @@ class Extraction:
                 if part.get_content_type() != 'text/plain' and part.get_content_type() != 'multipart/mixed' and part.get_content_type != 'text/html' and part.get_content_type() != 'multipart/alternative':
                     try:
                         os.mkdir("/home/marco/appNewsMail/attachments/"+str(msgid))
+                        os.system("chown marco /home/marco/appNewsMail/attachments/"+str(msgid))
                         os.system("chmod 777 /home/marco/appNewsMail/attachments/"+str(msgid))
                     except OSError:
                         pass

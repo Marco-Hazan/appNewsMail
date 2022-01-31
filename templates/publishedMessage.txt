@@ -4,7 +4,7 @@ Msgid: $msgid <br>
 Published on: $channels <br>
 Channels created: $newchannels <br>
 Attachments: $attachments <br>
-Expiration date: $expirydate
+Expiration date: $expirydate <br>
 Body:
 <p>
   $body

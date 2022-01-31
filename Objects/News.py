@@ -1,7 +1,7 @@
 class News:
 
     def __init__(self,msgid,sender,title,body,htmlbody,creation_date,expiration_date):
-        if id == None or sender == None or title == None or creation_date == None or expiration_date == None:
+        if id == None or sender == None or title == None or creation_date == None:
             raise TypeError('Non ci possono essere argomenti None')
         self.__msgid = msgid
         self.__sender = sender
@@ -13,7 +13,7 @@ class News:
 
     def __str__(self):
         s = "sender:"+self.__sender+"\ntitle:"+self.__title + "\n";
-        s += "\n"+self.__body;
+        s += "\n"+self.__htmlbody;
         return s
 
     def __eq__(self,other):

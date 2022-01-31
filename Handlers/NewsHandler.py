@@ -1,6 +1,7 @@
 from functions.config import Config
 import email
 import os
+import markdown
 import base64
 from os import path
 import shutil
@@ -66,11 +67,13 @@ class NewsHandler:
             pathAttachments = Config.get("attachments_path")+"/"+receivedMsgid
             if path.exists(pathAttachments):
                 shutil.rmtree(pathAttachments)
-            body = Extraction.extractBody(email)
-            htmlbody = Extraction.extractHtml(email)
-            newsmailDao.updateBody(receivedMsgid,body,htmlbody)
+            body = None
+            bodyhtml = Extraction.extractHtml(email)
+            if bodyhtml is None:
+                bodyhtml = markdown.markdown(Extraction.extractBody(email)).replace("\n","<br>")
+            newsmailDao.updateBody(receivedMsgid,body,bodyhtml)
             attachments = Extraction.extractAttachments(email,receivedMsgid)
-            MailFunction.sendUpdatedMail(receivedMsgid,sender,body,htmlbody,attachments)
+            MailFunction.sendUpdatedMail(receivedMsgid,sender,body,bodyhtml,attachments)
 
 
     def update_title(email,pattern):
