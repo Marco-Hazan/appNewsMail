@@ -1,3 +1,0 @@
-The news can't be validated because of an error.
-The subject "$subject" is not valid.
-The subject has to be of this form: [channel1,channel2,...]{dd/mm/YYYY}title_news

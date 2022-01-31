@@ -1,1 +1,0 @@
-The news with id "$msgid" has been deleted

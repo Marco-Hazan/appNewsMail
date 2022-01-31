@@ -1,1 +1,0 @@
-Your account "$sender" is not registered or is not valid.
