@@ -5,26 +5,28 @@ import smtplib
 import gnupg
 import time
 import unittest
+from functions.config import Config
 from Dao.newsmailDao import newsmailDao
 from Dao.SentDao import SentDao
 from Dao.ChannelDao import ChannelDao
 
+tester = "marco.hazan@studenti.unimi.it"
 
 def sendMailSigned(subject,body,type):
     basemsg = MIMEMultipart()
     basemsg.attach(MIMEText(body,type))
-    gpg = gnupg.GPG(gnupghome='/home/marco/.gnupg')
+    gpg = gnupg.GPG(gnupghome = Config.get("pathtogpg"))
     basetext = basemsg.as_string().replace('\n', '\r\n')
     signature = str(gpg.sign(basetext, detach=True))
     signmsg = TestNews.messageFromSignature(signature)
     msg = MIMEMultipart(_subtype="signed", micalg="pgp-sha1",
     protocol="application/pgp-signature")
     msg['Subject'] = subject
-    msg['From'] = 'marco@islab.di.unimi.itt'
+    msg['From'] = tester + "t"
     msg.attach(basemsg)
     msg.attach(signmsg)
     s = smtplib.SMTP("localhost")
-    s.sendmail("marco@islab.di.unimi.itt",["newsmail@islab.di.unimi.it"], msg.as_string())
+    s.sendmail(tester+"t",["newsmail@islab.di.unimi.it"], msg.as_string())
     s.quit()
 
 def sendMail(subject,body,type):
@@ -32,10 +34,10 @@ def sendMail(subject,body,type):
     basemsg.attach(MIMEText(body,type))
     msg = MIMEMultipart()
     msg['Subject'] = subject
-    msg['From'] = 'marco@islab.di.unimi.itt'
+    msg['From'] = tester + "t"
     msg.attach(basemsg)
     s = smtplib.SMTP("localhost")
-    s.sendmail('marco@islab.di.unimi.itt',["newsmail@islab.di.unimi.it"], msg.as_string())
+    s.sendmail(tester + "t",["newsmail@islab.di.unimi.it"], msg.as_string())
     s.quit()
 
 
@@ -60,7 +62,6 @@ class TestNews(unittest.TestCase):
         sendMailSigned(subject,body,'plain')
         time.sleep(1)
         news = newsmailDao.getLastByTitle('Titolo News Prova')
-        print(news)
         self.assertEqual(newsmailDao.getStatus(news.msgid),2)
         newsmailDao.deleteNews(news.msgid)
         news2 = newsmailDao.getLastByTitle('Titolo News Prova')
@@ -79,7 +80,6 @@ class TestNews(unittest.TestCase):
         sendMail(subject,body,'plain')
         time.sleep(1)
         news = newsmailDao.getLastByTitle('Titolo News Prova 2')
-        print(news)
         self.assertEqual(newsmailDao.getStatus(news.msgid),1)
         sent_channels = SentDao.getChannels(news.msgid)
         self.assertEqual(len(sent_channels),1)
@@ -103,11 +103,12 @@ class TestNews(unittest.TestCase):
         time.sleep(1)
         news = newsmailDao.getLastByTitle('Titolo News Prova 3')
         self.assertEqual(newsmailDao.getStatus(news.msgid),2)
-        sent_channels = SentDao.getChannels(news.msgid)
+         #sent_channels = SentDao.getChannels("0f36f299e8fb373dd053127d30cce07577978854bbb3cb5f9cce3767c2d597d4")
         newchannel = ChannelDao.getChannel('newchannel')
         self.assertIsNotNone(newchannel)
         self.assertEqual(newchannel.name,'newchannel')
-        self.assertEqual(newchannel.owner,'marco@islab.di.unimi.it')
+        self.assertEqual(newchannel.owner,tester)
+        sent_channels = SentDao.getChannels(news.msgid)
         self.assertEqual(len(sent_channels),2)
         self.assertEqual(sent_channels[0].get("chname"),'islab')
         newsmailDao.deleteNews(news.msgid)
@@ -121,8 +122,15 @@ class TestNews(unittest.TestCase):
         newchannel = ChannelDao.getChannel('newchannel')
         self.assertIsNone(newchannel)
 
-
-    
+    def test_4(self):
+        subject = '[islab]Titolo News Prova 4'
+        body = '# Prova news'
+        sendMail(subject,body,'plain')
+        time.sleep(1)
+        news = newsmailDao.getLastByTitle('Titolo News Prova 4')
+        self.assertEqual(newsmailDao.getStatus(news.msgid),1)
+        subject = 'confirm news news.msgid'
+        body = '# Prova news'
 
 
 

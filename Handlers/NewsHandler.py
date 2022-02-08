@@ -11,6 +11,7 @@ from Dao.ChannelDao import ChannelDao
 from Dao.CanSendOnDao import CanSendOnDao
 from Dao.SenderDao import SenderDao
 from functions.mailfunctions import MailFunction
+from Dao.SentDao import SentDao
 import re
 
 class NewsHandler:
@@ -34,6 +35,7 @@ class NewsHandler:
         sender = Extraction.extractSender(email)
         receivedMsgid = pattern.split(" ")[2]
         status = newsmailDao.getStatus(receivedMsgid)
+        # if status in not None: ----
         if status is 1 and newsmailDao.getSender(receivedMsgid) == sender:
             newsmailDao.updateStatus(receivedMsgid,2)
             newsmail = newsmailDao.get(receivedMsgid)
@@ -44,7 +46,11 @@ class NewsHandler:
                 ChannelDao.insert(c,sender)
                 CanSendOnDao.insert(sender,c)
             attachments = split_confirm[2][split_confirm[2].find(":")+ 1:].split(",")
-            MailFunction.sendPublishedMail(newsmail,sender,new_channels,attachments)
+            unpublishedchannels = SentDao.getUnPublishedChannels(receivedMsgid)
+            notpermittedchnames = []
+            for ch in unpublishedchannels:
+                notpermittedchnames.append(ch.name)
+            MailFunction.sendPublishedMail(newsmail,sender,new_channels,attachments,notpermittedchnames)
 
     def delete_news(email,pattern):
         sender = Extraction.extractSender(email)

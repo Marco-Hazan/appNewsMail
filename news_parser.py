@@ -55,6 +55,7 @@ def generaId():
 s = ""
 for line in sys.stdin:
     s += line.replace("\n","\r\n")
+print(s)
 data = s
 parsermail = Parser()
 email = parsermail.parsestr(data)
@@ -64,11 +65,11 @@ email = parsermail.parsestr(data)
 ###
 #estraggo sender
 sender = Extraction.extractSender(email)
+print(sender)
 valid_sender = checksender(sender)
 if not valid_sender:
     MailFunction.sendSenderErrorMail(sender)
     exit()
-
 firmata = CheckSig.verifySignature(data,sender)
 cc = email.get('Cc')
 #estraggo data della mail
@@ -79,13 +80,14 @@ creation_date = x.strftime("%Y-%m-%d %H:%M")
 
 #estraggo il subject della mail
 subject = email.get('Subject')
-
+print(subject)
 if ChannelHandler.IsChannelRelatedPattern(subject) and firmata:
     ChannelHandler.ChannelAction(subject,email)
     exit()
 
 if NewsHandler.isNewsRelated(subject):
     NewsHandler.newsAction(email,subject)
+    exit()
 #il subject è valido se rispetta questa modalità: [channel1,channel2,...]{dd/mm/yyyy}subject
 valid_pattern1 = "\[[A-Za-z0-9_, ]*\]\{[0-9][0-9]\/[0-9][0-9]\/[0-9][0-9][0-9][0-9]\}.+"
 valid_pattern2 = "\[[A-Za-z0-9_, ]*\].+"
@@ -144,5 +146,6 @@ for c in channels:
 
 if firmata:
     MailFunction.sendPublishedMail(newsmail,sender,new_channels,attachments,channelsnotpermitted)
+    print("pubblicata")
 else:
     MailFunction.sendConfirmationMail(newsmail,sender,channelnames,attachments,new_channels)

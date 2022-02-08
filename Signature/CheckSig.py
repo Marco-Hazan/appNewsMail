@@ -2,6 +2,7 @@ import sys
 import os
 import gnupg
 import subprocess
+from functions.config import Config
 from email.parser import Parser
 
 class CheckSig:
@@ -14,7 +15,7 @@ class CheckSig:
         cont = s.split("--"+boundary)[1]
         cont = cont[cont.find("\n")+1:].rstrip() + "\r\n"
         b = bytes(cont,"ISO-8859-15")
-        f = open("/home/marco/appNewsMail/master/signaturefiles/body.txt", "wb")
+        f = open(Config.get("master_path")+"signaturefiles/body.txt", "wb")
         f.write(b)
         f.close()
 
@@ -22,7 +23,7 @@ class CheckSig:
         if email.is_multipart():
             for part in email.walk():
                 if part.get_content_type() == 'application/pgp-signature':
-                    with open("/home/marco/appNewsMail/master/signaturefiles/bodysig", 'w') as f:
+                    with open(Config.get("master_path")+"signaturefiles/bodysig", 'w') as f:
                         f.write(str(part.get_payload()))
                         f.close()
                         return True
@@ -30,26 +31,27 @@ class CheckSig:
 
     def verifySignature(data,signer):
         try:
-            os.mkdir("/home/marco/appNewsMail/master/signaturefiles/")
+            os.mkdir(Config.get("master_path")+"signaturefiles/")
         except OSError:
             pass
         parsermail = Parser()
-        with open("/home/marco/appNewsMail/master/signaturefiles/body.eml","w") as f:
+        print("Ciao verify")
+        with open(Config.get("master_path")+"signaturefiles/body.eml","w") as f:
             f.write(data)
             f.close()
         email = parsermail.parsestr(data)
         extracted = CheckSig.extractSignature(email)
         if extracted:
-            CheckSig.extractContent("/home/marco/appNewsMail/master/signaturefiles/body.eml")
-            gpg = gnupg.GPG(gnupghome='/home/marco/.gnupg')
-            sig = open("/home/marco/appNewsMail/master/signaturefiles/bodysig","rb")
-            verified = gpg.verify_file(sig,"/home/marco/appNewsMail/master/signaturefiles/body.txt")
+            CheckSig.extractContent(Config.get("master_path")+"signaturefiles/body.eml")
+            gpg = gnupg.GPG(gnupghome = Config.get("pathtogpg"))
+            sig = open(Config.get("master_path")+"signaturefiles/bodysig","rb")
+            verified = gpg.verify_file(sig,Config.get("master_path")+"signaturefiles/body.txt")
             username = verified.username[verified.username.find("<")+1:verified.username.find(">")]
             if verified.valid and signer == username:
                 print("Firma valida da "+ username)
                 return True
             return False
-            shutil.rmtree("/home/marco/appNewsMail/master/signaturefiles")
+            shutil.rmtree(Config.get("master_path")+"signaturefiles")
         return False
 
     #parsermail = Parser()

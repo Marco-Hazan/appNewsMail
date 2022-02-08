@@ -2,6 +2,7 @@ import email
 import os
 import base64
 from os import path
+from functions.config import Config
 
 
 class Extraction:
@@ -16,10 +17,16 @@ class Extraction:
         if email.is_multipart():
             for part in email.walk():
                 if part.get_content_type() == 'text/plain':
-                    body += part.get_payload().replace("\n","")
+                    if part['Content-Transfer-Encoding'] == 'base64':
+                        body += base64.b64decode(part.get_payload()).decode("UTF-8")
+                    else:
+                        body += str(part.get_payload())
         else:
             if email.get_content_type() == 'text/plain':
-                body = email.get_payload()
+                if email['Content-Transfer-Encoding'] == 'base64':
+                    body = base64.b64decode(email.get_payload()).decode("UTF-8")
+                else:
+                    body = str(email.get_payload())
         return body
 
 
@@ -45,24 +52,26 @@ class Extraction:
         return bodyhtml
 
     def extractAttachments(email,msgid):
+        iddir = str(msgid)[0:32]
         attachments = []
+        directorycreated = False
         if email.is_multipart():
             for part in email.walk():
-                if part.get_content_type() != 'text/plain' and part.get_content_type() != 'multipart/mixed' and part.get_content_type != 'text/html' and part.get_content_type() != 'multipart/alternative':
-                    try:
-                        os.mkdir("/home/marco/appNewsMail/attachments/"+str(msgid))
-                        os.system("chown marco /home/marco/appNewsMail/attachments/"+str(msgid))
-                        os.system("chmod 777 /home/marco/appNewsMail/attachments/"+str(msgid))
-                    except OSError:
-                        pass
-                    if part.get_filename() is not None:
+                if part.get_filename() is not None:
+                    print(part.get_filename())
+                    if part["Content-Type"].split(";")[0] != "application/pgp-signature":
+                        if not directorycreated:
+                            os.mkdir(Config.get("attachments_path")+iddir)
+                            directorycreated = True
                         filename = part.get_filename()
                         attachments.append(filename)
-                        with open("/home/marco/appNewsMail/attachments/"+str(msgid)+"/"+filename, 'ab') as f:
+                        with open(Config.get("attachments_path")+iddir+"/"+filename, 'ab') as f:
                             try:
-                                os.system("chmod 777 /home/marco/appNewsMail/attachments/"+str(msgid)+"/"+filename)
                                 message_bytes = base64.b64decode(str(part.get_payload()))
                                 f.write(message_bytes)
+                                os.system("chmod 744 "+ Config.get("attachments_path") +iddir+"/"+filename)
                             except ValueError:
                                 pass
+            if directorycreated:
+                os.system("chmod 744 "+ Config.get("attachments_path") +iddir)
         return attachments
