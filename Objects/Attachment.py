@@ -1,31 +1,23 @@
+class Attachment:
 
-class Channel:
-
-    def __init__(self, name, is_active, owner, isnew):
+    def __init__(self, name, path):
         self.__name = name
-        self.__is_active = is_active
-        self.__owner = owner
-        self.__isnew = isnew
+        self.__path = path
 
     @property
     def name(self):
         return self.__name
 
     @property
-    def is_active(self):
-        return self.__is_active
-
-    @property
-    def owner(self):
-        return self.__owner
-
-    @property
-    def isnew(self):
-        return self.__isnew
+    def path(self):
+        return self.__path
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
-            return self.name == other.name
+            return (
+                    self.name == other.name
+                    and self.path == other.path
+            )
         else:
             return False
 

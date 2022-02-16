@@ -2,9 +2,9 @@ import smtplib
 from string import Template
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from email.message  import EmailMessage
 from functions.config import Config
 from Dao.SentDao import SentDao
+from Dao.newsmailDao import newsmailDao
 
 
 class MailFunction:
@@ -15,7 +15,7 @@ class MailFunction:
             s += str(item)+","
         return s[:-1]
 
-    def sendConfirmationMail(newsmail,sender,channels,attachments,newchannels):
+    def sendConfirmationMail(newsmail, sender, channels, attachments, newchannels):
         msg = MIMEMultipart()
         msg['Subject'] = 'confirm news ' + newsmail.msgid
         msg['From'] = Config.get("newsmail")
@@ -26,23 +26,22 @@ class MailFunction:
         msg['To'] = sender
         d = {
             'msgid': newsmail.msgid,
-            'publisher' : sender,
-            'title' : newsmail.title,
+            'publisher': sender,
+            'title': newsmail.title,
+            'attachments': str(attachments),
             'recipients': str(channels),
-            'newchannels': MailFunction.rapprArray(newchannels),
-            'attachments': MailFunction.rapprArray(attachments),
             'expirydate': str(newsmail.expiration_date),
             'body': newsbody
         }
         with open(Config.get("master_path")+'/templates/messageConfirmation.txt', 'r') as f:
             src = Template(f.read())
             confirmationMessage = src.substitute(d)
-        msg.attach(MIMEText(confirmationMessage,'html'))
+        msg.attach(MIMEText(confirmationMessage, 'html'))
         s = smtplib.SMTP(Config.get("smtp"))
         s.sendmail(Config.get("newsmail"), [sender], msg.as_string())
         s.quit()
 
-    def sendSubjectErrorMail(sender,subject):
+    def sendSubjectErrorMail(sender, subject):
         msg = MIMEMultipart()
         msg['Subject'] = 'Error on validation news'
         msg['From'] = Config.get("newsmail")
@@ -52,7 +51,7 @@ class MailFunction:
         with open(Config.get("master_path")+'/templates/SubjectError.txt', 'r') as f:
             src = Template(f.read())
             errorMessage = src.substitute(d)
-        msg.attach(MIMEText(errorMessage,'plain'))
+        msg.attach(MIMEText(errorMessage, 'plain'))
         s = smtplib.SMTP(Config.get("smtp"))
         s.sendmail(Config.get("newsmail"), [sender], msg.as_string())
         s.quit()
@@ -67,12 +66,12 @@ class MailFunction:
         with open(Config.get("master_path")+'/templates/SenderError.txt', 'r') as f:
             src = Template(f.read())
             errorMessage = src.substitute(d)
-        msg.attach(MIMEText(errorMessage,'plain'))
+        msg.attach(MIMEText(errorMessage, 'plain'))
         s = smtplib.SMTP(Config.get("smtp"))
         s.sendmail(Config.get("newsmail"), [sender], msg.as_string())
         s.quit()
 
-    def sendChannelErrorMail(sender,channels):
+    def sendChannelErrorMail(sender, channels):
         msg = MIMEMultipart()
         msg['Subject'] = 'Error on validation news'
         msg['From'] = Config.get("newsmail")
@@ -82,17 +81,17 @@ class MailFunction:
         with open(Config.get("master_path")+'/templates/ChannelError.txt', 'r') as f:
             src = Template(f.read())
             errorMessage = src.substitute(d)
-        msg.attach(MIMEText(errorMessage,'plain'))
+        msg.attach(MIMEText(errorMessage, 'plain'))
         s = smtplib.SMTP('localhost')
         s.sendmail(Config.get("newsmail"), [sender], msg.as_string())
         s.quit()
 
-
-    def sendPublishedMail(newsmail,sender,newchannels,attachments,channelsNotPermitted):
+    def sendPublishedMail(newsmail, sender, newchannels, attachments, channelsNotPermitted):
         msg = MIMEMultipart()
         msg['Subject'] = 'The news is published'
         msg['From'] = Config.get("newsmail")
         channels = SentDao.getPublishedChannels(newsmail.msgid)
+        bodytoupdate = newsmailDao.getBody(newsmail.msgid).replace("\n", "%0A")
         channelstext = ""
         for c in channels:
             channelstext += c.name + ","
@@ -105,19 +104,20 @@ class MailFunction:
             'channels': channelstext,
             'newchannels': str(newchannels),
             'attachments': attachments,
-            'expirydate' : newsmail.expiration_date,
+            'expirydate': newsmail.expiration_date,
             'body': newsbody,
+            'bodytoupdate': bodytoupdate,
             'channelsnotpermitted': str(channelsNotPermitted)
         }
         with open(Config.get("master_path")+'/templates/publishedMessage.txt', 'r') as f:
             src = Template(f.read())
             publishedMessage = src.substitute(d)
-        msg.attach(MIMEText(publishedMessage,'html'))
+        msg.attach(MIMEText(publishedMessage, 'html'))
         s = smtplib.SMTP(Config.get("smtp"))
         s.sendmail(Config.get("newsmail"), [sender], msg.as_string())
         s.quit()
 
-    def sendDeletedMail(msgid,sender):
+    def sendDeletedMail(msgid, sender):
         msg = MIMEMultipart()
         msg['Subject'] = 'The news has been deleted'
         msg['From'] = Config.get("newsmail")
@@ -127,50 +127,54 @@ class MailFunction:
         with open(Config.get("master_path")+'/templates/deletedMessage.txt', 'r') as f:
             src = Template(f.read())
             deletedMessage = src.substitute(d)
-        msg.attach(MIMEText(deletedMessage,'plain'))
+        msg.attach(MIMEText(deletedMessage, 'plain'))
         s = smtplib.SMTP(Config.get("smtp"))
         s.sendmail(Config.get("newsmail"), [sender], msg.as_string())
         s.quit()
 
-    def sendUpdatedMail(msgid,sender,body,htmlbody,attachments):
+    def sendUpdatedMail(news, attachments):
         msg = MIMEMultipart()
         msg['Subject'] = 'The news is updated'
         msg['From'] = Config.get("newsmail")
-        if htmlbody is None:
-            newsbody = body
-        else:
-            newsbody = htmlbody
+        publishedChannels = SentDao.getPublishedChannels(news.msgid)
+        channels = []
+        for c in publishedChannels:
+            channels.append(c.name)
+        bodytoupdate = newsmailDao.getBody(news.msgid).replace("\n", "%0A")
         d = {
-            'msgid': msgid,
-            'body': newsbody,
-            'attachments': str(attachments)
+            'msgid': news.msgid,
+            'body': news.htmlbody,
+            'channels': str(channels),
+            'attachments': str(attachments),
+            'bodytoupdate': bodytoupdate,
+            'expirydate': news.expiration_date
         }
         with open(Config.get("master_path")+'/templates/updatedMessage.txt', 'r') as f:
             src = Template(f.read())
             updatedMessage = src.substitute(d)
-        msg.attach(MIMEText(updatedMessage,'html'))
+        msg.attach(MIMEText(updatedMessage, 'html'))
         s = smtplib.SMTP(Config.get("smtp"))
-        s.sendmail(Config.get("newsmail"), [sender], msg.as_string())
+        s.sendmail(Config.get("newsmail"), [news.sender], msg.as_string())
         s.quit()
 
-    def sendCreatedChannel(channelname,sender):
+    def sendCreatedChannel(channelname, sender):
         msg = MIMEMultipart()
         msg['Subject'] = 'The channel ' + channelname + ' has been created'
         msg['From'] = Config.get("newsmail")
         d = {
-            'channel' : channelname
+            'channel': channelname
         }
         with open(Config.get("master_path")+'/templates/newchannel.txt', 'r') as f:
             src = Template(f.read())
             updatedMessage = src.substitute(d)
-        msg.attach(MIMEText(updatedMessage,'html'))
+        msg.attach(MIMEText(updatedMessage, 'html'))
         s = smtplib.SMTP(Config.get("smtp"))
         s.sendmail(Config.get("newsmail"), [sender], msg.as_string())
 
-    def sendRequestToPublish(channel,owner,newsmail,attachments):
+    def sendRequestToPublish(channel, owner, newsmail, attachments):
         print(newsmail.msgid)
         msg = MIMEMultipart()
-        msg['Subject'] = 'Request to publish on channel '+ channel.name
+        msg['Subject'] = 'Request to publish on channel ' + channel.name
         print(msg['Subject'])
         msg['From'] = Config.get("newsmail")
         if not newsmail.is_html:
@@ -187,13 +191,14 @@ class MailFunction:
         with open(Config.get("master_path")+'/templates/requestToPublish.txt', 'r') as f:
             src = Template(f.read())
             updatedMessage = src.substitute(d)
-        msg.attach(MIMEText(updatedMessage,'html'))
+        msg.attach(MIMEText(updatedMessage, 'html'))
         s = smtplib.SMTP(Config.get("smtp"))
         print(owner)
-        s.sendmail(Config.get("newsmail"),['marco@islab.di.unimi.it'], msg.as_string())
+        s.sendmail(Config.get("newsmail"), [
+                   'marco@islab.di.unimi.it'], msg.as_string())
         s.quit()
 
-    def sendListOfChannels(rcpt,channels):
+    def sendListOfChannels(rcpt, channels):
         msg = MIMEMultipart()
         msg['Subject'] = 'List of your channels'
         msg['From'] = Config.get("newsmail")
@@ -210,7 +215,7 @@ class MailFunction:
         with open(Config.get("master_path")+'/templates/listChannels.txt', 'r') as f:
             src = Template(f.read())
             updatedMessage = src.substitute(d)
-        msg.attach(MIMEText(updatedMessage,'html'))
+        msg.attach(MIMEText(updatedMessage, 'html'))
         s = smtplib.SMTP(Config.get("smtp"))
-        s.sendmail(Config.get("newsmail"),rcpt, msg.as_string())
+        s.sendmail(Config.get("newsmail"), rcpt, msg.as_string())
         s.quit()

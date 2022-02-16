@@ -1,7 +1,7 @@
 import yaml
 
-class Config:
 
+class Config:
 
     def get(item):
         config_file = open("/home/marco/appNewsMail/master/config.yaml")
@@ -9,7 +9,7 @@ class Config:
         config_file.close()
         return config[item]
 
-    def getInnested(father,child):
+    def getInnested(father, child):
         config_file = open("/home/marco/appNewsMail/master/config.yaml")
         config = yaml.safe_load(config_file)
         config_file.close()

@@ -1,56 +1,56 @@
-From marco.hazan@studenti.unimi.it  Tue Feb  8 13:27:22 2022
+From marco.hazan@studenti.unimi.it  Thu Feb 10 17:53:46 2022
 Return-Path: <marco.hazan@studenti.unimi.it>
 X-Original-To: newsmail@islab.di.unimi.it
 Delivered-To: newsmail@islab.di.unimi.it
 Received: from [127.0.0.1] (localhost [127.0.0.1])
-	by islab.di.unimi.it (Postfix) with ESMTP id BE48C480E7E
-	for <newsmail@islab.di.unimi.it>; Tue,  8 Feb 2022 13:27:22 +0100 (CET)
-Message-ID: <3961f032-2865-2869-66f4-109f969338a3@studenti.unimi.it>
-Date: Tue, 8 Feb 2022 13:27:22 +0100
+	by islab.di.unimi.it (Postfix) with ESMTP id 73A94242EF9
+	for <newsmail@islab.di.unimi.it>; Thu, 10 Feb 2022 17:53:46 +0100 (CET)
+Message-ID: <beaed78e-266d-62c4-ba29-4515ad492e4f@studenti.unimi.it>
+Date: Thu, 10 Feb 2022 17:53:46 +0100
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
  Thunderbird/91.5.0
 To: newsmail@islab.di.unimi.it
-Subject: confirm news
- d50f6a7c990d824d0687ad07a5621110dc3959fd0e347a79d8a323ca19d1064f
+Subject: delete news
+ ebea28093d684dfa2d94237fe6913b14635be708cc2399b079a4843ebb5b8615
 Content-Language: en-US
-From: Marco Hazan <marco.hazan@studenti.unimi.it>
+From: marco <marco.hazan@studenti.unimi.it>
 Content-Type: multipart/signed; micalg=pgp-sha256;
  protocol="application/pgp-signature";
- boundary="------------2ODG0eSoR0loTFvDg8dpiuv5"
+ boundary="------------pkP0ryW0429xc0vNLxBrV5G0"
 
 This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---------------2ODG0eSoR0loTFvDg8dpiuv5
-Content-Type: multipart/mixed; boundary="------------0cyu70fBSW07dY08pUF0bak0";
+--------------pkP0ryW0429xc0vNLxBrV5G0
+Content-Type: multipart/mixed; boundary="------------5wNcydRS9iAHO8gGJv0yDoHK";
  protected-headers="v1"
-From: Marco Hazan <marco.hazan@studenti.unimi.it>
+From: marco <marco.hazan@studenti.unimi.it>
 To: newsmail@islab.di.unimi.it
-Message-ID: <3961f032-2865-2869-66f4-109f969338a3@studenti.unimi.it>
-Subject: confirm news
- d50f6a7c990d824d0687ad07a5621110dc3959fd0e347a79d8a323ca19d1064f
+Message-ID: <beaed78e-266d-62c4-ba29-4515ad492e4f@studenti.unimi.it>
+Subject: delete news
+ ebea28093d684dfa2d94237fe6913b14635be708cc2399b079a4843ebb5b8615
 
---------------0cyu70fBSW07dY08pUF0bak0
+--------------5wNcydRS9iAHO8gGJv0yDoHK
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: base64
 
-DQpuZXdjaGFubmVsczoNCmF0dGFjaG1lbnRzOg0K
+DQo=
 
---------------0cyu70fBSW07dY08pUF0bak0--
+--------------5wNcydRS9iAHO8gGJv0yDoHK--
 
---------------2ODG0eSoR0loTFvDg8dpiuv5
+--------------pkP0ryW0429xc0vNLxBrV5G0
 Content-Type: application/pgp-signature; name="OpenPGP_signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="OpenPGP_signature"
 
 -----BEGIN PGP SIGNATURE-----
 
-wsB5BAABCAAjFiEEl2ayuCd8GgfQvoD5LRUueD8+l/AFAmICYaoFAwAAAAAACgkQLRUueD8+l/Ad
-SQf+Pz9z21aEhRC/w0WFJsVIa3F2b9CpitF+EvkxmioUrN2Pk3hebHvlPY9I9TeUcmyA7STdtWqE
-coGTyzvdM7C9t0ZsATf9cCj5twycPwERk+CGMZDLZM0dMz/j7/L8yBNtDupvJjAU6xZkvJixVkFH
-pzd7sp0ocPARbziMq1sHPRd3u+HnbzJitkTYd/P9ouIYY+83uJ2DL6MOhL3jWRSozTCwk64Lc8xt
-mx8gZUJFxhI8GKmneDwqchhXpfk6JXbqiUFqzxQ/iIasF9CAlQLc87rOF/j5hA4wUw4rmblcLpdP
-YRma+vstOv4lkwahgNxgmFPG3dB7YOiTviOX5FycjA==
-=z26/
+wsB5BAABCAAjFiEErYVX3hXVOiEC+o3m8FtH1Jw6HWAFAmIFQxoFAwAAAAAACgkQ8FtH1Jw6HWBf
+cwf+MRn6B+QGnzSj2j6QNrEZyOsR9LMI9gjAEBI+jgvdiNxoO/pzp6Q2yr2r9tn5qBw6hnQCV8Pb
+rAui3EDkrpFdcqdmYHZfr+cIBCWR9THEJaaCo6SP+u4Zivb73Twk7zndlAdwG8PqbT99Ql0tRnHt
+5A904dnJlob3w8xKfkGN3G6f1lKVpCpFPp6bR53I3H5yYpygYjJ23U4GH6jOn7FTcCGt9BrBmeME
+M0Fs8unLJIWcxGrScQqB9u9nULc5yK7Ktw35LCv/9I++WsX3weqg/EaLuaOjOn5GitxmaQGKGtFx
+cP1t71A9bTIFjwLEZNaUDSey6WhUhOLWeAEpbgms7Q==
+=PRwD
 -----END PGP SIGNATURE-----
 
---------------2ODG0eSoR0loTFvDg8dpiuv5--
+--------------pkP0ryW0429xc0vNLxBrV5G0--

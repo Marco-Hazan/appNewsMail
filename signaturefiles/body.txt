@@ -1,15 +1,15 @@
-Content-Type: multipart/mixed; boundary="------------0cyu70fBSW07dY08pUF0bak0";
+Content-Type: multipart/mixed; boundary="------------5wNcydRS9iAHO8gGJv0yDoHK";
  protected-headers="v1"
-From: Marco Hazan <marco.hazan@studenti.unimi.it>
+From: marco <marco.hazan@studenti.unimi.it>
 To: newsmail@islab.di.unimi.it
-Message-ID: <3961f032-2865-2869-66f4-109f969338a3@studenti.unimi.it>
-Subject: confirm news
- d50f6a7c990d824d0687ad07a5621110dc3959fd0e347a79d8a323ca19d1064f
+Message-ID: <beaed78e-266d-62c4-ba29-4515ad492e4f@studenti.unimi.it>
+Subject: delete news
+ ebea28093d684dfa2d94237fe6913b14635be708cc2399b079a4843ebb5b8615
 
---------------0cyu70fBSW07dY08pUF0bak0
+--------------5wNcydRS9iAHO8gGJv0yDoHK
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: base64
 
-DQpuZXdjaGFubmVsczoNCmF0dGFjaG1lbnRzOg0K
+DQo=
 
---------------0cyu70fBSW07dY08pUF0bak0--
+--------------5wNcydRS9iAHO8gGJv0yDoHK--

@@ -1,5 +1,15 @@
-[[The news $msgid is updated]]
-<br><br>
-[body]: $body
+The news [$msgid] has been updated<br>
 <br>
-[attachments]: $attachments
+Msgid: $msgid <br>
+Published on: $channels <br>
+Attachments: $attachments <br>
+Expiration date: $expirydate <br>
+Body:
+<p>
+  $body
+</p>
+If you want to delete it you can send a message with the subject 'delete news $msgid' or, if your client support it you can click on this link:
+<a href = "mailto:newsmail@islab.di.unimi.it?subject=delete%20news%20$msgid">Delete news </a>
+<br>
+If you want to update the news you can send a message with the subject 'update news $msgid' or, if your client support it you can click on this link:
+<a href = "mailto:newsmail@islab.di.unimi.it?subject=update%20news%20$msgid&body=$bodytoupdate">Update news</a>
