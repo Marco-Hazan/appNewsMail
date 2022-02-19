@@ -58,38 +58,34 @@ def generaId():
 s = ""
 for line in sys.stdin:
     s += line.replace("\n", "\r\n")
-print(s)
 data = s
 parsermail = Parser()
-email = parsermail.parsestr(data)
+msg = parsermail.parsestr(data)
 ###
-
 
 ###
 # estraggo sender
-sender = Extraction.extractSender(email)
-print(sender)
+sender = Extraction.extractSender(msg)
 valid_sender = checksender(sender)
 if not valid_sender:
     MailFunction.sendSenderErrorMail(sender)
     exit()
 firmata = CheckSig.verifySignature(data, sender)
-cc = email.get('Cc')
+cc = msg.get('Cc')
 # estraggo data della mail
-date = email.get('Date')
+date = msg.get('Date')
 x = parser.parse(date)
 creation_date = x.strftime("%Y-%m-%d %H:%M")
 ###
 
 # estraggo il subject della mail
-subject = email.get('Subject')
-print(subject)
+subject = msg.get('Subject')
 if ChannelHandler.IsChannelRelatedPattern(subject) and firmata:
-    ChannelHandler.ChannelAction(subject, email)
+    ChannelHandler.ChannelAction(subject, msg)
     exit()
 
 if NewsHandler.isNewsRelated(subject):
-    NewsHandler.newsAction(email, subject)
+    NewsHandler.newsAction(msg, subject)
     exit()
 # il subject è valido se rispetta questa modalità: [channel1,channel2,...]{dd/mm/yyyy}subject
 valid_pattern1 = "\[[A-Za-z0-9_, ]*\]\{[0-9][0-9]\/[0-9][0-9]\/[0-9][0-9][0-9][0-9]\}.+"
@@ -115,12 +111,12 @@ else:
     exit()
 
 # straggo body
-# body = Extraction.extractBody(email)
-body = Extraction.extractBody(email)
-bodyhtml = Extraction.extractHtml(email)
+# body = Extraction.extractBody(msg)
+body = Extraction.extractBody(msg)
+bodyhtml = Extraction.extractHtml(msg)
 if bodyhtml is None:
-    bodyhtml = markdown.markdown(Extraction.extractBody(email))
-attachments = Extraction.extractAttachments(email, msgid)
+    bodyhtml = markdown.markdown(Extraction.extractBody(msg))
+attachments = Extraction.extractAttachments(msg, msgid)
 newsmail = News(msgid, sender, title, body, bodyhtml,
                 creation_date, expiration_date)
 if firmata:
@@ -152,7 +148,6 @@ for c in channels:
 if firmata:
     MailFunction.sendPublishedMail(
         newsmail, sender, new_channels, attachments, channelsnotpermitted)
-    print("pubblicata")
 else:
     MailFunction.sendConfirmationMail(
         newsmail, sender, channelnames, attachments, new_channels)

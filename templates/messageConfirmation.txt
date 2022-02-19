@@ -10,4 +10,4 @@ $body
 <br><br>
 if the message is correct, please reply to this email.
 If you want to confirm the publication, you can send a message with the subject 'confirm news $msgid' or, if your client support it you can click on this link:
-<a href = "mailto:newsmail@islab.di.unimi.it?subject=confirm%20news%20$msgid">Confirm publication</a>
+<a href = "mailto:inewsmail@islab.di.unimi.it?subject=confirm%20news%20$msgid">Confirm publication</a>

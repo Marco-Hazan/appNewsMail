@@ -7,16 +7,6 @@ from Objects.Channel import Channel
 from functions.extract import Extraction
 from functions.mailfunctions import MailFunction
 
-def extractBody(email):
-    body = ""
-    if email.is_multipart():
-        for part in email.walk():
-            if part.get_content_type() == 'text/plain':
-                body += part.get_payload().replace("\n","")
-    else:
-        if email.get_content_type() == 'text/plain':
-            body = email.get_payload()
-    return body
 
 class ChannelHandler:
 
@@ -70,6 +60,8 @@ class ChannelHandler:
 
 
     def EnableNews(user,channel,title_news):
+        print(title_news)
+        print(user)
         newsmail = newsmailDao.getByTitleAndUser(user,title_news)
         SentDao.enable(newsmail.msgid,channel)
 
@@ -80,7 +72,8 @@ class ChannelHandler:
             CanSendOnDao.insert(user,channel)
 
     def createChannel(name,owner):
-        ChannelDao.insert(name,owner)
+        if ChannelDao.getChannel(name) is None:
+            ChannelDao.insert(name,owner)
 
     def deleteChannel(name,owner):
         ChannelDao.delete(name,owner)
@@ -111,6 +104,7 @@ class ChannelHandler:
         MailFunction.sendListOfChannels(sender,channels)
 
     def IsChannelRelatedPattern(pattern):
+        print(pattern)
         return ("Create channel" in pattern or "Delete channel" in pattern or
         "Enable channel" in pattern or "Disable channel" in pattern or
         "Enable user on channel" in pattern or "Disable user on channel" in pattern or
@@ -120,41 +114,43 @@ class ChannelHandler:
         if "Create channel" in pattern:
             tot_sender = email.get('From')
             sender = tot_sender[tot_sender.find("<")+1:tot_sender.find(">")]
-            ChannelHandler.createChannel(extractBody(email).strip(),sender)
+            title = Extraction.extractBody(email)
+            ChannelHandler.createChannel(title,sender)
+            MailFunction.sendCreatedChannel(title,sender)
         elif "Delete channel" in pattern:
             tot_sender = email.get('From')
             sender = tot_sender[tot_sender.find("<")+1:tot_sender.find(">")]
-            ChannelHandler.deleteChannel(extractBody(email).strip(),sender)
+            ChannelHandler.deleteChannel(Extraction.extractBody(email),sender)
         elif "Enable channel" in pattern:
-            ChannelHandler.enableChannel(extractBody(email).strip())
+            ChannelHandler.enableChannel(Extraction.extractBody(email))
             return True
         elif "Disable channel" in pattern:
-            ChannelHandler.disableChannel(extractBody(email).strip())
+            ChannelHandler.disableChannel(Extraction.extractBody(email))
             return True
         elif "Enable user on channel" in pattern:
             users = str(email.get('Cc')).split(", ")
-            ChannelHandler.EnableUsersOnChannel(users,extractBody(email).strip())
+            ChannelHandler.EnableUsersOnChannel(users,Extraction.extractBody(email))
             return True
         elif "Disable user on channel" in pattern:
             users = str(email.get('Cc')).split(", ")
-            ChannelHandler.DisableUsersOnChannel(users,extractBody(email).strip())
+            ChannelHandler.DisableUsersOnChannel(users,Extraction.extractBody(email))
             return True
         elif "Enable publication" in pattern:
             user = str(email.get('Cc'))
             if len(pattern.split(" ")) == 4 and ("once" in pattern.split(" ")[2]):
-                ChannelHandler.EnableNews(user,pattern.split(" ")[3],extractBody(email).strip())
+                ChannelHandler.EnableNews(user,pattern.split(" ")[3],Extraction.extractBody(email))
                 return True
             elif len(pattern.split(" ")) == 4 and ("always" in pattern.split(" ")[2]):
                 sender = str(email.get('Cc'))
-                ChannelHandler.EnableNews(user,pattern.split(" ")[3],extractBody(email).strip())
+                ChannelHandler.EnableNews(user,pattern.split(" ")[3],Extraction.extractBody(email))
                 ChannelHandler.EnableUserOnChannel(user,pattern.split(" ")[3])
                 return True
         elif "Reject" in pattern and len(pattern.split(" ")) == 3 and len(pattern.split(" ")[2]) == 64:
-            ChannelHandler.reject(pattern.split(" ")[2],extractBody(email).strip())
+            ChannelHandler.reject(pattern.split(" ")[2],Extraction.extractBody(email))
             return True
         elif "Update channel name" in pattern and len(pattern.split(" ")) == 4:
             sender = Extraction.extractSender(email)
-            ChannelHandler.updateChannelName(sender,pattern.split(" ")[3],extractBody(email).strip())
+            ChannelHandler.updateChannelName(sender,pattern.split(" ")[3],Extraction.extractBody(email))
         elif "List channel" in pattern:
             sender = Extraction.extractSender(email)
             ChannelHandler.list_channels(sender)

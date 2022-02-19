@@ -83,7 +83,7 @@ class NewsHandler:
         if (
             newsmailDao.getSender(receivedMsgid) == sender
         ):
-            pathAttachments = Config.get("attachments_path")+"/"+receivedMsgid
+            pathAttachments = Config.get("attachments_path")+"/"+receivedMsgid[0:32]
             if path.exists(pathAttachments):
                 shutil.rmtree(pathAttachments)
             body = Extraction.extractBody(email)

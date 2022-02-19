@@ -10,7 +10,11 @@ from Dao.newsmailDao import newsmailDao
 from Dao.SentDao import SentDao
 from Dao.ChannelDao import ChannelDao
 
+#PRECONDIZIONE: TESTER DEVE ESSERE OWNER DEL CANALE ISLAB
+
 tester = "marco.hazan@studenti.unimi.it"
+timetosleep = 5
+mail_newsmail = "inewsmail@islab.di.unimi.it"
 
 def sendMailSigned(subject,body,type):
     basemsg = MIMEMultipart()
@@ -60,7 +64,7 @@ class TestNews(unittest.TestCase):
         subject = '[islab]{19/01/2022}Titolo News Prova'
         body = 'Prova news'
         sendMailSigned(subject,body,'plain')
-        time.sleep(1)
+        time.sleep(timetosleep)
         news = newsmailDao.getLastByTitle('Titolo News Prova')
         self.assertEqual(newsmailDao.getStatus(news.msgid),2)
         newsmailDao.deleteNews(news.msgid)
@@ -78,7 +82,7 @@ class TestNews(unittest.TestCase):
         subject = '[islab]{19/01/2022}Titolo News Prova 2'
         body = 'Prova news 2'
         sendMail(subject,body,'plain')
-        time.sleep(1)
+        time.sleep(timetosleep)
         news = newsmailDao.getLastByTitle('Titolo News Prova 2')
         self.assertEqual(newsmailDao.getStatus(news.msgid),1)
         sent_channels = SentDao.getChannels(news.msgid)
@@ -100,10 +104,9 @@ class TestNews(unittest.TestCase):
         subject = '[islab,newchannel]{19/01/2022}Titolo News Prova 3'
         body = '<p><b>Prova News</b></p>'
         sendMailSigned(subject,body,'html')
-        time.sleep(1)
+        time.sleep(timetosleep)
         news = newsmailDao.getLastByTitle('Titolo News Prova 3')
         self.assertEqual(newsmailDao.getStatus(news.msgid),2)
-         #sent_channels = SentDao.getChannels("0f36f299e8fb373dd053127d30cce07577978854bbb3cb5f9cce3767c2d597d4")
         newchannel = ChannelDao.getChannel('newchannel')
         self.assertIsNotNone(newchannel)
         self.assertEqual(newchannel.name,'newchannel')
@@ -118,7 +121,7 @@ class TestNews(unittest.TestCase):
         sent_channels = SentDao.getChannels(news.msgid)
         self.assertEqual(0,len(sent_channels))
         sendMailSigned('Delete channel','newchannel','plain')
-        time.sleep(1)
+        time.sleep(timetosleep)
         newchannel = ChannelDao.getChannel('newchannel')
         self.assertIsNone(newchannel)
 
@@ -126,7 +129,7 @@ class TestNews(unittest.TestCase):
         subject = '[islab]Titolo News Prova 4'
         body = '# Prova news'
         sendMail(subject,body,'plain')
-        time.sleep(1)
+        time.sleep(timetosleep)
         news = newsmailDao.getLastByTitle('Titolo News Prova 4')
         self.assertEqual(newsmailDao.getStatus(news.msgid),1)
         subject = 'confirm news news.msgid'

@@ -1,4 +1,6 @@
 The channel <b>$channel</b> has been created <br><br>
 
 If you want to delete it because you didn't want to create it click here:<br>
-<a href= "mailto:newsmail@islab.di.unimi.it?subject=delete%20channel&body=$channel"
+<a href= "mailto:inewsmail@islab.di.unimi.it?subject=delete%20channel&body=$channel">Delete $channel </a><br>
+If you want to add users with permission of publication on this channel click here:<br>
+<a href = "mailto:inewsmail@islab.di.unimi.it?subject=Enable%20user%20on%20channel&body=$channel">Enable users</a>, stating on the cc which users you want to enable.

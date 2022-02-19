@@ -13,6 +13,7 @@ class Extraction:
     def extractBody(mail):
         body = ""
         if mail.is_multipart():
+            print()
             for part in mail.walk():
                 if (
                         part.get_content_type() == 'text/plain'
@@ -23,13 +24,14 @@ class Extraction:
                                                  ).decode("UTF-8")
                     else:
                         body += str(part.get_payload())
+            body = body.rstrip()
         else:
-            if email.get_content_type() == 'text/plain':
-                if email['Content-Transfer-Encoding'] == 'base64':
+            if mail.get_content_type() == 'text/plain':
+                if mail['Content-Transfer-Encoding'] == 'base64':
                     body = base64.b64decode(
-                        email.get_payload()).decode("UTF-8")
+                        mail.get_payload()).decode("UTF-8")
                 else:
-                    body = str(email.get_payload())
+                    body = str(mail.get_payload()).rstrip()
         return body
 
     def extractHtml(mail):

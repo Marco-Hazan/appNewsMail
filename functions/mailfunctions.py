@@ -195,7 +195,7 @@ class MailFunction:
         s = smtplib.SMTP(Config.get("smtp"))
         print(owner)
         s.sendmail(Config.get("newsmail"), [
-                   'marco@islab.di.unimi.it'], msg.as_string())
+                   owner], msg.as_string())
         s.quit()
 
     def sendListOfChannels(rcpt, channels):
