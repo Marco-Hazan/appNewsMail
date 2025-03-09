@@ -5,7 +5,7 @@ const fsPromises = fs.promises;
 const yaml = require('js-yaml');
 const app = express();
 const port = 3000;
-const file_config = fs.readFileSync('home/marco/appNewsMail/master/config.yaml', 'utf8');
+const file_config = fs.readFileSync('../config.yaml', 'utf8');
 const config = yaml.load(file_config);
 const config_db = {
   user: config.database.user_db,
@@ -74,6 +74,11 @@ app.get('/',function (req, res){
 app.get('/:channel',(req,res) => {
   res.setHeader('Content-Type', 'application/json');
   queryChannel(req.params.channel,async function(obj){
+    if(!obj.articles){
+      res.send(JSON.stringify({
+        status:"Disabled or not exists"
+      }));
+    }
       for(i=0;i<obj.articles.length;i++){
         obj.articles[i].attachments = [];
         names = await listDir(config.attachments_path+"/"+obj.articles[i].msgid);

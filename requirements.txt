@@ -1,0 +1,7 @@
+markdown
+psycopg2-binary
+mysql-connector 
+python-gnupg
+python-dateutil
+pyyaml
+bs4

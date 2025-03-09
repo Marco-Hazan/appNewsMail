@@ -9,7 +9,7 @@ shit.txt
 secretmarco.pgp
 #conf
 *.yaml
-
+.venv/*
 # Node artifact files
 node_modules/
 dist/
