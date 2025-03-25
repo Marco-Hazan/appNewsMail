@@ -109,3 +109,15 @@ class SentDao:
         record = cursor.fetchone()
         connection.close()
         return record[0]
+
+    def isSent(msgid,channel):
+        actionsDb = ActionsDb()
+        connection = actionsDb.connectdb()
+        cursor = connection.cursor()
+        sql = "SELECT * FROM senton WHERE channel = %s AND newsmail = %s"
+        code = ChannelDao.getCode(channel)
+        val = (code,msgid)
+        cursor.execute(sql, val)
+        issent = cursor.rowcount == 1
+        connection.close()
+        return issent

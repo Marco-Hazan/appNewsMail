@@ -19,3 +19,10 @@ class Config:
         config = yaml.safe_load(config_file)
         config_file.close()
         return config[father][child]
+
+    def set(item,value):
+        with open('config.yaml') as f:
+            doc = yaml.safe_load(f)
+        doc[item] = value
+        with open('config.yaml', 'w') as f:
+            yaml.dump(doc, f)

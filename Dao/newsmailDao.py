@@ -4,6 +4,8 @@ from Objects.News import News
 from .SenderDao import SenderDao
 import time
 import datetime
+from datetime import timedelta
+from datetime import datetime
 
 
 class newsmailDao:
@@ -17,7 +19,9 @@ class newsmailDao:
         cursor.execute(sql, val)
         row = cursor.fetchone()
         connection.close()
-        return row[5]
+        if row is not None:
+            return row[5]
+        return None
 
     def getLast(username):
         actionsDb = ActionsDb()
@@ -29,7 +33,9 @@ class newsmailDao:
         cursor.execute(sql, val)
         row = cursor.fetchone()
         connection.close()
-        return News(row[0], row[1], row[2], row[3], row[4], row[6], row[7])
+        if row is not None:
+            return News(row[0], row[1], row[2], row[3], row[4], row[6], row[7])
+        return None
 
     def getLastByTitle(title):
         news = None
@@ -42,7 +48,13 @@ class newsmailDao:
         row = cursor.fetchone()
         connection.close()
         if row is not None:
-            return News(row[0], SenderDao.getUsername(row[1]), row[2], row[3], row[4], row[6], row[7])
+            creation_date = row[6]
+            creation_date = creation_date.strftime("%d/%m/%Y")
+            expiration_date = row[7]
+            if expiration_date is not None:
+                expiration_date = expiration_date.strftime("%d/%m/%Y")
+            return News(row[0], SenderDao.getUsername(row[1]), row[2], row[3], row[4],creation_date, expiration_date)
+        return None
 
     def get(msgid):
         news = None
@@ -113,7 +125,9 @@ class newsmailDao:
         cursor.execute(sql, val)
         record = cursor.fetchone()
         connection.close()
-        return record[0]
+        if record is not None:
+            return record[0]
+        return None
 
     def getSender(msgid):
         actionsDb = ActionsDb()
@@ -124,7 +138,9 @@ class newsmailDao:
         cursor.execute(sql, val)
         record = cursor.fetchone()
         connection.close()
-        return record[0]
+        if record is not None:
+            return record[0]
+        return None
 
     def deleteNews(msgid):
         actionsDb = ActionsDb()
@@ -160,6 +176,7 @@ class newsmailDao:
         actionsDb = ActionsDb()
         connection = actionsDb.connectdb()
         cursor = connection.cursor()
+        print("hello")
         sql = "UPDATE newsmail set expiration_date = %s where msgid = %s"
         val = (expiration_date, msgid)
         cursor.execute(sql, val)
@@ -204,3 +221,18 @@ class newsmailDao:
         if row is not None:
             return row[0]
         return None
+
+    def getByFirst32(first32_msgid):
+        news = None
+        actionsDb = ActionsDb()
+        connection = actionsDb.connectdb()
+        cursor = connection.cursor()
+        sql = "SELECT * FROM newsmail where msgid LIKE %s"
+        val = ("%"+first32_msgid+"%",)
+        cursor.execute(sql, val)
+        row = cursor.fetchone()
+        if row is not None:
+            sender = SenderDao.getUsername(row[1])
+            connection.close()
+            news = News(row[0], sender, row[2], row[3], row[4], row[6], row[7])
+        return news

@@ -1,0 +1,2 @@
+The news can't be published on channels $channelsnotpermitted.
+A mail has been sent to their owner, if they agree the news will be published on his channel.

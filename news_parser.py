@@ -28,6 +28,8 @@ from email.parser import Parser
 from Signature.CheckSig import CheckSig
 from Handlers.NewsHandler import NewsHandler
 from functions.extract import Extraction
+from Handlers.RegistrationHandler import RegistrationHandler
+from functions.config import Config
 
 #Funzione che controlla che il sender sia esistente e attivo
 
@@ -59,6 +61,7 @@ s = ""
 for line in sys.stdin:
     s += line.replace("\n", "\r\n")
 data = s
+print(data)
 parsermail = Parser()
 msg = parsermail.parsestr(data)
 ###
@@ -67,19 +70,23 @@ msg = parsermail.parsestr(data)
 # estraggo sender
 sender = Extraction.extractSender(msg)
 valid_sender = checksender(sender)
-if not valid_sender:
+if not Config.get("publicaccess") and not valid_sender:
     MailFunction.sendSenderErrorMail(sender)
     exit()
 firmata = CheckSig.verifySignature(data, sender)
 cc = msg.get('Cc')
 # estraggo data della mail
 date = msg.get('Date')
-x = parser.parse(date)
-creation_date = x.strftime("%Y-%m-%d %H:%M")
+creation_date = parser.parse(date)
+#creation_date = creation_date.strftime("%Y-%m-%d %H:%M")
 ###
-
 # estraggo il subject della mail
 subject = msg.get('Subject')
+
+if RegistrationHandler.isRegistrationPattern(subject):
+    RegistrationHandler.RegistrationAction(subject,msg)
+    exit()
+
 if ChannelHandler.IsChannelRelatedPattern(subject) and firmata:
     ChannelHandler.ChannelAction(subject, msg)
     exit()
@@ -101,7 +108,7 @@ if pattern1.match(subject) or pattern2.match(subject):
     if pattern1.match(subject):
         expiration_date = subject[subject.find("{")+1:subject.find("}")]
         expiration_date = datetime.strptime(expiration_date, '%d/%m/%Y')
-        expiration_date = expiration_date.strftime("%Y-%m-%d %H:%M")
+        #expiration_date = expiration_date.strftime("%Y-%m-%d %H:%M")
         title = subject[subject.find("}")+1:]
     else:
         expiration_date = None
@@ -112,10 +119,11 @@ else:
 
 # straggo body
 # body = Extraction.extractBody(msg)
-body = Extraction.extractBody(msg)
+body = None
 bodyhtml = Extraction.extractHtml(msg)
 if bodyhtml is None:
-    bodyhtml = markdown.markdown(Extraction.extractBody(msg))
+    body = Extraction.extractBody(msg)
+    bodyhtml = markdown.markdown(body)
 attachments = Extraction.extractAttachments(msg, msgid)
 newsmail = News(msgid, sender, title, body, bodyhtml,
                 creation_date, expiration_date)
@@ -131,18 +139,31 @@ channelsnotpermitted = []
 
 for c in channels:
     if c.isnew:
-        new_channels.append(c.name)
-        CanSendOnDao.insert(sender, c.name)
-        SentDao.insert(msgid, c.name, True)
-        ChannelDao.insert(c.name, c.owner)
-        if not firmata:
-            ChannelDao.disable(c.name)
+        if Config.get("createchannelonnews"):
+            new_channels.append(c.name)
+            ChannelDao.insert(c)
+            CanSendOnDao.insert(c.owner,c.name)
+            SentDao.insert(msgid, c.name, True)
+            if not firmata:
+                ChannelDao.disable(c.name)
     elif ChannelHandler.isLegit(c.name, sender):
         SentDao.insert(msgid, c.name, True)
     elif not CanSendOnDao.check(sender, c.name):
         channelsnotpermitted.append(c.name)
         SentDao.insert(msgid, c.name, False)
         MailFunction.sendRequestToPublish(c, c.owner, newsmail, attachments)
+    elif (
+            (not c.is_active ) and
+            (c.owner == sender) and
+            Config.get("enablechannel_on_ownernews")
+        ):
+            if firmata:
+                ChannelDao.enable(c.name)
+                SentDao.insert(msgid,c.name,True)
+            else:
+                SentDao.insert(msgid,c.name,False)
+
+
 
 
 if firmata:

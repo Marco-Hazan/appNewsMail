@@ -86,7 +86,9 @@ class ChannelDao:
         val = (channelname,)
         cursor.execute(sql,val)
         record = cursor.fetchone()
-        return record[0]
+        if record is not None:
+            return record[0]
+        return None
 
     def getName(code):
         actionsDb = ActionsDb()
@@ -98,13 +100,13 @@ class ChannelDao:
         record = cursor.fetchone()
         return record[0]
 
-    def insert(name,owner):
+    def insert(channel):
         actionsDb = ActionsDb()
         connection = actionsDb.connectdb()
         cursor = connection.cursor()
         sql = "INSERT INTO channel (name,owner) VALUES(%s,%s)"
-        ownerid = SenderDao.getId(owner)
-        val = (name,ownerid)
+        ownerid = SenderDao.getId(channel.owner)
+        val = (channel.name,ownerid)
         cursor.execute(sql,val)
         connection.commit()
         connection.close()
@@ -153,7 +155,7 @@ class ChannelDao:
         connection.close()
         if cursor == None:
             return None
-        return Channel(record[0],record[1],record[2],False)
+        return Channel(record[0],record[1],SenderDao.getUsername(record[2]),False)
 
     def updateName(oldname,newname):
         actionsDb = ActionsDb()

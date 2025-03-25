@@ -1,4 +1,4 @@
-The news is published<br>
+The news <b>$title</b> is published<br>
 <br>
 Msgid: $msgid <br>
 Published on: $channels <br>
@@ -9,12 +9,16 @@ Body:
 <p>
   $body
 </p>
-If you want to delete it you can send a message with the subject 'delete news $msgid' or, if your client support it you can click on this link:
-<a href = "mailto:inewsmail@islab.di.unimi.it?subject=delete%20news%20$msgid">Delete news </a>
+If you want to delete it you can send a message with the <span style="color:blue"> Subject </span> 'delete news $msgid' or, if your client support it you can click on this link:
+<a href = "mailto:$newsmail?subject=delete%20news%20$msgid">Delete news </a>
 <br>
-If you want to update the news you can send a message with the subject 'update news $msgid' or, if your client support it you can click on this link:
-<a href = "mailto:inewsmail@islab.di.unimi.it?subject=update%20news%20$msgid&body=$bodytoupdate">Update news</a>
+If you want to update the news you can send a message with the <span style="color:blue"> Subject </span><u><b> 'update news $msgid'</u></b> or, if your client support it you can click on this link:
+<a href = 'mailto:$newsmail?subject=update%20news%20$msgid&body=$bodytoupdate'>Update news</a>
 <br>
+If you want to update the title of the news you can send a message with the <span style="color:blue"> Subject </span><u><b>'update title $msgid' </u></b >or, if your client support it you can click on this link:
+<a href = 'mailto:$newsmail?subject=update%20title%20$msgid&body=$title'>Update news</a>
 <br>
-The news can't be published on channels $channelsnotpermitted.
-A mail has been sent to their owner, if they agree the news will be published on his channel.
+If you want to update the expiration_date of the news you can send a message with the <span style="color:blue"> Subject </span><u><b> <u><b>'update expiration_date $msgid'</u></b> or, if your client support it you can click on this link:
+<a href = 'mailto:$newsmail?subject=update%20title%20$msgid&body=$expiration_date'>Update news</a>
+<br>
+$channelsnotpermitted

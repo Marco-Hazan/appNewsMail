@@ -1,6 +1,7 @@
 import email
 import os
 import base64
+import quopri
 from functions.config import Config
 
 
@@ -13,25 +14,16 @@ class Extraction:
     def extractBody(mail):
         body = ""
         if mail.is_multipart():
-            print()
             for part in mail.walk():
                 if (
                         part.get_content_type() == 'text/plain'
                         and part.get_filename() is None
                 ):
-                    if part['Content-Transfer-Encoding'] == 'base64':
-                        body += base64.b64decode(part.get_payload()
-                                                 ).decode("UTF-8")
-                    else:
-                        body += str(part.get_payload())
+                    body += Extraction.decodeBody(part)
             body = body.rstrip()
         else:
             if mail.get_content_type() == 'text/plain':
-                if mail['Content-Transfer-Encoding'] == 'base64':
-                    body = base64.b64decode(
-                        mail.get_payload()).decode("UTF-8")
-                else:
-                    body = str(mail.get_payload()).rstrip()
+                body = Extraction.decodeBody(mail)
         return body
 
     def extractHtml(mail):
@@ -39,10 +31,10 @@ class Extraction:
         if mail.is_multipart():
             for part in mail.walk():
                 if part.get_content_type() == 'text/html':
-                    bodyhtml = part.get_payload()
+                    bodyhtml = Extraction.decodeBody(part)
         else:
             if mail.get_content_type() == 'text/html':
-                bodyhtml = mail.get_payload()
+                bodyhtml = Extraction.decodeBody(mail)
         return bodyhtml
 
     def extractAttachments(mail, msgid):
@@ -72,12 +64,48 @@ class Extraction:
                                     str(part.get_payload()))
                                 f.write(message_bytes)
                                 os.system(
-                                    "chmod 744 "
+                                    "chmod 755 "
                                     + Config.get("attachments_path")
                                     + iddir+"/"+filename)
                             except ValueError:
                                 pass
             if directorycreated:
                 os.system(
-                    "chmod 744 " + Config.get("attachments_path") + iddir)
+                    "chmod 755 " + Config.get("attachments_path") + iddir)
         return attachments
+
+    def extractPublicKey(msg):
+        if msg.is_multipart():
+            for part in msg.walk():
+                if(
+                    "application/pgp-keys" in part["Content-Type"]
+                ):
+                    print(part["Content-Transfer-Encoding"])
+                    with open(
+                        Config.get("master_path") + "registration_pubkey.pgp",
+                        "w"
+                    ) as f:
+                        if(
+                            part["Content-Transfer-Encoding"] == "quoted-printable"
+                        ):
+                            f.write(quopri.decodestring(str(part.get_payload())).decode("utf-8"))
+                        elif part["Content-Transfer-Encoding"] == "base64":
+                            message_bytes = base64.b64decode(
+                                message_bytes = str(part.get_payload())
+                            )
+                            quopri.decodestring(message_bytes).decode("utf-8")
+                            print(message_bytes)
+                            f.write(message_bytes)
+                        else:
+                            f.write(str(part.get_payload()))
+                        f.close()
+                    return Config.get("master_path") + "registration_pubkey.pgp"
+
+    def decodeBody(part):
+        if part['Content-Transfer-Encoding'] == 'base64':
+            return  base64.b64decode(
+                part.get_payload()).decode('latin-1').encode('latin-1').decode('utf-8')
+        elif part['Content-Transfer-Encoding'] == 'quoted-printable':
+            return quopri.decodestring(str(part.get_payload())).decode("utf-8")
+        else:
+            return part.get_payload()

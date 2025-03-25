@@ -1,0 +1,4 @@
+Hello, <br>
+Welcome to newsmail service, your new password is $pwd. <br>
+To confirm your identity please click on this link below:<br>
+<a href = "mailto:$newsmail?subject=confirm%20identity&body=$pwd">Confirm identity</a>
